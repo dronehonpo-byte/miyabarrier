@@ -4,7 +4,9 @@
     "noEmit": true,
     "types": ["node"],
     "paths": {
-      "@miyabarrier/core": ["../core/src/index.ts"]
+      "@miyabarrier/core": ["../core/src/index.ts"],
+      "@miyabarrier/design/logo": ["../design/src/logo.ts"],
+      "@miyabarrier/design/tokens": ["../design/src/tokens.ts"]
     }
   },
   "include": ["src", "tests"]

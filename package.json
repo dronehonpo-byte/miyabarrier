@@ -19,7 +19,7 @@
     "format:check": "prettier --check \"**/*.{ts,js,mjs,json,md,html,yml}\"",
     "demo": "node scripts/serve-demo.mjs",
     "verify": "npm run format:check && npm run lint && npm run typecheck && npm test && npm run build",
-    "gen": "node scripts/build-patterns.mjs",
+    "gen": "node scripts/build-patterns.mjs && node scripts/build-design.mjs",
     "pretest": "node scripts/build-patterns.mjs"
   },
   "devDependencies": {
@@ -44,5 +44,6 @@
   "homepage": "https://github.com/dronehonpo-byte/miyabarrier#readme",
   "bugs": {
     "url": "https://github.com/dronehonpo-byte/miyabarrier/issues"
-  }
+  },
+  "type": "module"
 }

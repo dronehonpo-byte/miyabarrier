@@ -1,0 +1,8 @@
+{
+  "name": "@miyabarrier/design",
+  "version": "0.3.0",
+  "private": true,
+  "description": "Design tokens, shared UI css and the Miyabee logo mark used by widget / dashboard / demo.",
+  "license": "MIT",
+  "type": "module"
+}

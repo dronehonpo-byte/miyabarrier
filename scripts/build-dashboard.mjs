@@ -29,6 +29,8 @@ await esbuild.build({
   define: { __MIYABARRIER_VERSION__: JSON.stringify('dashboard') },
   alias: {
     '@miyabarrier/core': join(root, 'packages', 'core', 'src', 'index.ts'),
+    '@miyabarrier/design/logo': join(root, 'packages', 'design', 'src', 'logo.ts'),
+    '@miyabarrier/design/tokens': join(root, 'packages', 'design', 'src', 'tokens.ts'),
     '@miyabarrier/widget/log': join(root, 'packages', 'widget', 'src', 'log.ts'),
   },
   banner: { js: '/*! Miyabarrier dashboard | MIT License */' },

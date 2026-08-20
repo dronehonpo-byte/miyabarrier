@@ -20,6 +20,7 @@ import {
   type LogEntry,
 } from './aggregate';
 import {
+  mountMark,
   renderDaily,
   renderHistogram,
   renderRanked,
@@ -56,20 +57,29 @@ const renderAll = (): void => {
   renderSummary($('summary'), summary);
   renderDaily($('daily'), byDay(entries));
   renderHistogram($('histogram'), scoreHistogram(entries), thresholds);
-  renderRanked($('reasons'), topReasons(entries), 'まだ理由の記録がありません。');
-  renderRanked($('paths'), topPaths(entries), 'ブロック・確認になった送信はまだありません。');
+  renderRanked($('reasons'), topReasons(entries), 'まだ理由の記録がありません。', {
+    total: entries.length,
+  });
+  renderRanked($('paths'), topPaths(entries), 'ブロック・確認になった送信はまだありません。', {
+    total: summary.counts.block + summary.counts.review,
+    tone: 'block',
+  });
   renderSimulation(
     $('simulation'),
     simulateThresholds(entries, thresholds.review, thresholds.block),
     summary,
   );
   renderTable($('log'), entries);
+
+  const origin = typeof location === 'undefined' ? '' : location.origin;
+  $('topbar-context').textContent =
+    entries.length === 0 ? `検知ログ · ${origin}` : `${entries.length} 件の記録 · ${origin}`;
 };
 
 const setStatus = (message: string, tone: 'info' | 'warn' = 'info'): void => {
   const status = $('status');
   status.textContent = message;
-  status.className = `status status-${tone}`;
+  status.className = `mb-banner mb-banner--${tone}`;
 };
 
 const load = (raw: unknown, source: string): void => {
@@ -82,7 +92,7 @@ const load = (raw: unknown, source: string): void => {
     );
   } else {
     const skipped = result.skipped > 0 ? `（${result.skipped} 件は形式が合わず読み飛ばし）` : '';
-    setStatus(`${source}: ${entries.length} 件の記録を読み込みました${skipped}`);
+    setStatus(`${source}から ${entries.length} 件の記録を読み込みました${skipped}`);
   }
   renderAll();
 };
@@ -98,7 +108,7 @@ const loadFromStorage = (): void => {
   }
   if (raw === null) {
     setStatus(
-      `このオリジンには記録がありません（キー: ${LOG_STORAGE_KEY}）。保護対象サイトと同じオリジンに置くか、JSON を貼り付けてください。`,
+      `このオリジンには記録がありません（キー: ${LOG_STORAGE_KEY}）。保護対象サイトと同じオリジンに置くか、下の欄に JSON を貼り付けてください。`,
       'warn',
     );
     renderAll();
@@ -108,6 +118,9 @@ const loadFromStorage = (): void => {
 };
 
 const bind = (): void => {
+  mountMark(document.getElementById('brand-mark'), 'brand');
+  mountMark(document.getElementById('foot-mark'), 'foot');
+
   for (const id of ['review', 'block']) {
     $(id).addEventListener('input', renderAll);
   }
@@ -127,7 +140,7 @@ const bind = (): void => {
   $('export').addEventListener('click', () => {
     const textarea = document.getElementById('import-json') as HTMLTextAreaElement;
     textarea.value = JSON.stringify(entries, null, 2);
-    setStatus('読み込み済みの記録を下の欄に書き出しました。');
+    setStatus(`読み込み済みの ${entries.length} 件を下の欄に書き出しました。`);
   });
 
   $('clear').addEventListener('click', () => {

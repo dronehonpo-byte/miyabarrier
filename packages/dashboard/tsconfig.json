@@ -6,7 +6,10 @@
     "paths": {
       "@miyabarrier/core": ["../core/src/index.ts"],
       "@miyabarrier/widget": ["../widget/src/index.ts"],
-      "@miyabarrier/widget/log": ["../widget/src/log.ts"]
+      "@miyabarrier/widget/log": ["../widget/src/log.ts"],
+      "@miyabarrier/design/logo": ["../design/src/logo.ts"],
+      "@miyabarrier/design/tokens": ["../design/src/tokens.ts"],
+      "@miyabarrier/design/ui": ["../design/src/ui.ts"]
     }
   },
   "include": ["src", "tests"]
