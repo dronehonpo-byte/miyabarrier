@@ -9,7 +9,8 @@
       "@miyabarrier/widget/log": ["../widget/src/log.ts"],
       "@miyabarrier/design/logo": ["../design/src/logo.ts"],
       "@miyabarrier/design/tokens": ["../design/src/tokens.ts"],
-      "@miyabarrier/design/ui": ["../design/src/ui.ts"]
+      "@miyabarrier/design/ui": ["../design/src/ui.ts"],
+      "@miyabarrier/widget/counter": ["../widget/src/counter.ts"]
     }
   },
   "include": ["src", "tests"]

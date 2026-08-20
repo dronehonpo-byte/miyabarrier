@@ -155,6 +155,8 @@ const NON_BODY_TYPES = new Set(['email', 'tel', 'url', 'number', 'date', 'time',
 export interface FormValues {
   text: string;
   senderName: string;
+  /** 入力されたメールアドレス（お返しの営業の宛先に使う）。 */
+  email: string;
   typedChars: number;
 }
 
@@ -165,6 +167,7 @@ export interface FormValues {
 export const collectFormValues = (form: HTMLFormElement): FormValues => {
   const bodyParts: string[] = [];
   let senderName = '';
+  let email = '';
   let typedChars = 0;
 
   const elements = form.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>('input, textarea');
@@ -181,12 +184,13 @@ export const collectFormValues = (form: HTMLFormElement): FormValues => {
     const identity = `${element.name} ${element.id} ${element.getAttribute('placeholder') ?? ''}`;
 
     if (!senderName && NAME_FIELD_PATTERN.test(identity)) senderName = value;
+    if (!email && (type === 'email' || /mail/i.test(identity))) email = value.trim();
     if (NON_BODY_TYPES.has(type)) continue;
 
     bodyParts.push(value);
   }
 
-  return { text: bodyParts.join('\n'), senderName, typedChars };
+  return { text: bodyParts.join('\n'), senderName, email, typedChars };
 };
 
 /**

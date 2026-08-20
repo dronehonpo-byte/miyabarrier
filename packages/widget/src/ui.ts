@@ -92,10 +92,38 @@ const COMPONENT_CSS = `
 }
 .mb-guard__brand svg { width: 1.35em; height: 1.35em; }
 
+/* 送信できたとき / 止めたときに、この行の見た目でも状態を伝える */
+.mb-guard--verified { border-color: var(--mb-pass-line); background: var(--mb-pass-soft); }
+.mb-guard--flagged { border-color: var(--mb-review-line); background: var(--mb-review-soft); }
+.mb-guard--blocked { border-color: var(--mb-block-line); background: var(--mb-block-soft); }
+.mb-guard__state {
+  flex: 0 0 auto;
+  display: none;
+  align-items: center;
+  gap: 0.3em;
+  font-size: 0.78em;
+  font-weight: 560;
+  white-space: nowrap;
+}
+.mb-guard--verified .mb-guard__state,
+.mb-guard--flagged .mb-guard__state,
+.mb-guard--blocked .mb-guard__state { display: flex; }
+.mb-guard--verified .mb-guard__state { color: var(--mb-pass); }
+.mb-guard--flagged .mb-guard__state { color: var(--mb-review); }
+.mb-guard--blocked .mb-guard__state { color: var(--mb-block); }
+/* 状態が出たらブランド表記は引っ込める（横幅を食い合わないように） */
+.mb-guard--verified .mb-guard__brand span,
+.mb-guard--flagged .mb-guard__brand span,
+.mb-guard--blocked .mb-guard__brand span { display: none; }
+.mb-guard__state svg { width: 1.1em; height: 1.1em; }
+
 /* ---------- バッジ ---------- */
 
+/* 送信ボタンと同じ行に並ばないよう、通常のバッジは行を独立させる */
 .mb-badge {
-  display: inline-flex;
+  display: flex;
+  width: -moz-fit-content;
+  width: fit-content;
   align-items: center;
   gap: 0.4em;
   margin: 0.6em 0;
@@ -107,6 +135,7 @@ const COMPONENT_CSS = `
 .mb-badge:hover { color: var(--mb-brand-600); text-decoration: none; }
 .mb-badge svg { width: 1.25em; height: 1.25em; }
 .mb-badge--floating {
+  display: inline-flex;
   position: fixed;
   right: 14px;
   bottom: 14px;
@@ -259,6 +288,44 @@ const COMPONENT_CSS = `
 }
 .mb-panel--block .mb-panel__reasons li:first-child::before { background: var(--mb-block); }
 
+/* お返しの営業（相手にその場で読ませる文面） */
+.mb-counter {
+  border-top: 1px solid var(--mb-line);
+  padding: 0.9em 1.1em 1em 1.2em;
+  background: var(--mb-brand-050);
+}
+.mb-counter__head {
+  display: flex;
+  align-items: center;
+  gap: 0.45em;
+  font-size: 0.8em;
+  font-weight: 600;
+  color: var(--mb-brand-800);
+  margin-bottom: 0.45em;
+}
+.mb-counter__head svg { width: 1.1em; height: 1.1em; }
+.mb-counter__subject {
+  font-size: 0.84em;
+  font-weight: 560;
+  color: var(--mb-ink-900);
+  margin: 0 0 0.3em;
+}
+.mb-counter__body {
+  margin: 0;
+  font-family: inherit;
+  font-size: 0.82em;
+  line-height: 1.75;
+  color: var(--mb-ink-700);
+  white-space: pre-wrap;
+  max-height: 11em;
+  overflow-y: auto;
+}
+.mb-counter__note {
+  margin: 0.5em 0 0;
+  font-size: 0.74em;
+  color: var(--mb-ink-400);
+}
+
 /* 操作 */
 .mb-panel__actions {
   display: flex;
@@ -405,12 +472,44 @@ export const createCheckbox = (doc: Document, label: string, name: string): Chec
   field.htmlFor = input.id;
   field.append(input, el(doc, 'span', 'mb-guard__label', label));
 
+  const state = el(doc, 'span', 'mb-guard__state');
+  state.setAttribute('aria-live', 'polite');
+
   const brand = el(doc, 'span', 'mb-guard__brand');
   brand.title = 'Miyabarrier が送信内容を端末内で検証します（外部送信なし）';
   brand.append(mark(doc, 'guard'), el(doc, 'span', undefined, 'Miyabarrier'));
 
-  wrapper.append(field, brand);
+  wrapper.append(field, state, brand);
   return { wrapper, input };
+};
+
+/** チェック行の状態表示。判定のあとに呼ぶ。 */
+export type GuardState = 'idle' | 'verified' | 'review' | 'blocked';
+
+const GUARD_STATE_TEXT: Record<Exclude<GuardState, 'idle'>, string> = {
+  verified: '確認しました',
+  review: '確認が必要です',
+  blocked: '送信を止めました',
+};
+
+export const setGuardState = (wrapper: HTMLElement | undefined, next: GuardState): void => {
+  if (!wrapper) return;
+  wrapper.classList.remove('mb-guard--verified', 'mb-guard--flagged', 'mb-guard--blocked');
+  const state = wrapper.querySelector('.mb-guard__state');
+  if (!state) return;
+
+  if (next === 'idle') {
+    state.textContent = '';
+    return;
+  }
+  wrapper.classList.add(
+    next === 'verified'
+      ? 'mb-guard--verified'
+      : next === 'review'
+        ? 'mb-guard--flagged'
+        : 'mb-guard--blocked',
+  );
+  state.textContent = GUARD_STATE_TEXT[next];
 };
 
 // ---------------------------------------------------------------------------
@@ -487,6 +586,8 @@ export interface PanelOptions {
   message: string;
   result: AnalysisResult;
   debug: boolean;
+  /** お返しの営業。渡すとパネル内に文面を表示する。 */
+  counter?: { to: string; subject: string; body: string };
   /** 「それでも送信する」を出す場合のハンドラ。 */
   onOverride?: () => void;
   overrideLabel?: string;
@@ -548,6 +649,20 @@ export const createPanel = (doc: Document, options: PanelOptions): HTMLElement =
       list.append(el(doc, 'li', undefined, reason));
     }
     panel.append(list);
+  }
+
+  // --- お返しの営業（その場で読ませる）
+  if (options.counter) {
+    const counter = el(doc, 'div', 'mb-counter');
+    const head = el(doc, 'div', 'mb-counter__head');
+    head.append(mark(doc, 'counter'), el(doc, 'span', undefined, 'こちらからのご案内'));
+    counter.append(
+      head,
+      el(doc, 'p', 'mb-counter__subject', options.counter.subject),
+      el(doc, 'p', 'mb-counter__body', options.counter.body),
+      el(doc, 'p', 'mb-counter__note', `${options.counter.to} 宛の返信文を控えました。`),
+    );
+    panel.append(counter);
   }
 
   // --- 操作

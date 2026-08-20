@@ -25,8 +25,18 @@ import {
 import { collectFormValues, findForms, injectHoneypot, type InjectedHoneypot } from './inject';
 import { FormTelemetry } from './telemetry';
 import { appendLog, clearLog as clearStoredLog, readLog, type LogEntry } from './log';
+import {
+  buildCounterMail,
+  clearCounterQueue,
+  defaultCounterOptions,
+  queueCounterMail,
+  readCounterQueue,
+  shouldCounter,
+  type CounterMail,
+  type CounterOptions,
+} from './counter';
 import { markSvg } from '@miyabarrier/design/logo';
-import { createBadge, createCheckbox, createPanel, ensureStyles } from './ui';
+import { createBadge, createCheckbox, createPanel, ensureStyles, setGuardState } from './ui';
 
 declare const __MIYABARRIER_VERSION__: string;
 
@@ -66,6 +76,13 @@ export interface MiyabarrierOptions {
   logLimit: number;
   /** スクリプト読み込み時にフォームを自動検出して保護するか。 */
   autoInit: boolean;
+  /**
+   * お返しの営業（カウンターピッチ）。営業と判定したときに自社の営業文を作る。
+   * **自動送信はしない**。送信箱に溜め、ダッシュボードから人間が送る。
+   */
+  counter: CounterOptions;
+  /** お返しの営業を作ったときのフック。自前のエンドポイントへ渡したい場合に使う。 */
+  onCounter?: (mail: CounterMail, context: { form: HTMLFormElement }) => void;
   /** 判定後のフック。false を返すと、その回のブロックを取り消す。 */
   onVerdict?: (result: AnalysisResult, context: { form: HTMLFormElement }) => boolean | void;
 }
@@ -85,6 +102,7 @@ export const defaultOptions: MiyabarrierOptions = {
   log: true,
   logLimit: 200,
   autoInit: true,
+  counter: defaultCounterOptions,
 };
 
 // ---------------------------------------------------------------------------
@@ -177,6 +195,7 @@ export class ProtectedForm {
   private readonly telemetry: FormTelemetry;
   private honeypot?: InjectedHoneypot;
   private checkboxInput?: HTMLInputElement;
+  private checkboxRow?: HTMLElement;
   private checkedAt: number | null = null;
   private trustedClick: boolean | undefined;
   private pointerSamplesBeforeCheck = 0;
@@ -225,6 +244,12 @@ export class ProtectedForm {
   private mountCheckbox(doc: Document): void {
     const { wrapper, input } = createCheckbox(doc, this.options.checkboxLabel, 'mb_confirm');
     this.checkboxInput = input;
+    this.checkboxRow = wrapper;
+    // 入力し直したら状態表示は白紙に戻す（古い結果を残さない）
+    const reset = (): void => setGuardState(this.checkboxRow, 'idle');
+    this.form.addEventListener('input', reset, { passive: true });
+    this.cleanups.push(() => this.form.removeEventListener('input', reset));
+
     input.addEventListener('click', (event) => {
       this.toggleCount += 1;
       // isTrusted=false は「スクリプトからのクリック」。人間のクリックでは必ず true。
@@ -279,12 +304,58 @@ export class ProtectedForm {
     );
   }
 
-  private showPanel(result: AnalysisResult, allowOverride: boolean): void {
+  /**
+   * 営業と判定したときに、お返しの営業文を組み立てて送信箱に積む。
+   * ネットワークへは出さない（理由は counter.ts のコメント参照）。
+   */
+  private buildCounter(result: AnalysisResult): CounterMail | undefined {
+    const options = this.options.counter;
+    const sales = result.groups.find((group) => group.group === 'sales');
+    const values = collectFormValues(this.form);
+
+    const decision = shouldCounter(options, {
+      verdict: result.verdict,
+      salesApplicable: sales?.applicable ?? false,
+      salesScore: sales?.score ?? 0,
+      email: values.email,
+    });
+    if (!decision.ok) {
+      if (this.options.debug && options.enabled) {
+        console.warn('[miyabarrier] お返しの営業は作りませんでした:', decision.reason);
+      }
+      return undefined;
+    }
+
+    const mail = buildCounterMail(options, {
+      email: values.email,
+      name: values.senderName,
+      score: result.score,
+      salesScore: sales?.score ?? 0,
+      reasons: result.reasons.slice(0, 3),
+      site: typeof location === 'undefined' ? '' : location.hostname,
+      path: typeof location === 'undefined' ? '' : location.pathname,
+      at: new Date().toISOString(),
+    });
+
+    const queued = queueCounterMail(mail, options.queueLimit);
+    if (this.options.debug) {
+      console.warn('[miyabarrier] お返しの営業を送信箱に積みました:', queued, mail.to);
+    }
+    this.options.onCounter?.(mail, { form: this.form });
+    return mail;
+  }
+
+  private showPanel(
+    result: AnalysisResult,
+    allowOverride: boolean,
+    counterMail?: CounterMail,
+  ): void {
     this.panel?.remove();
     const panel = createPanel(this.form.ownerDocument, {
       message: result.verdict === 'block' ? this.options.blockMessage : this.options.reviewMessage,
       result,
       debug: this.options.debug,
+      ...(counterMail && this.options.counter.showOnScreen ? { counter: counterMail } : {}),
       ...(allowOverride
         ? {
             onOverride: () => {
@@ -343,6 +414,15 @@ export class ProtectedForm {
       console.warn('[miyabarrier]', result.verdict, result.score, result.reasons, result);
     }
 
+    const counterMail = this.buildCounter(result);
+
+    // チェック行にも結果を出す。送信が通ったことが分かる場所がないと、
+    // 利用者は「押したのに何も起きていない」と感じる。
+    setGuardState(
+      this.checkboxRow,
+      result.verdict === 'pass' ? 'verified' : result.verdict === 'review' ? 'review' : 'blocked',
+    );
+
     if (this.options.mode === 'report' || overriddenByHook || result.verdict === 'pass') {
       this.panel?.remove();
       this.panel = undefined;
@@ -354,7 +434,7 @@ export class ProtectedForm {
 
     event.preventDefault();
     event.stopImmediatePropagation();
-    this.showPanel(result, allowOverride);
+    this.showPanel(result, allowOverride, counterMail);
   }
 
   destroy(): void {
@@ -431,6 +511,8 @@ export const api = {
   analyzeText,
   getLog,
   clearLog,
+  getCounterQueue: readCounterQueue,
+  clearCounterQueue,
   destroyAll,
   defaultOptions,
   defaultWeights,

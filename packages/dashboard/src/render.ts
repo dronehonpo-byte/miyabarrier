@@ -6,6 +6,7 @@
  * このファイルには色やサイズのリテラルを書かない。
  */
 import { markSvg } from '@miyabarrier/design/logo';
+import { mailtoUrl, type CounterMail } from '@miyabarrier/widget/counter';
 import type {
   DailyBucket,
   HistogramBin,
@@ -520,4 +521,86 @@ export const renderTable = (host: HTMLElement, entries: readonly LogEntry[], lim
     nodes.push(el('p', 'mb-note', `直近 ${limit} 件を表示しています（全 ${entries.length} 件）。`));
   }
   host.replaceChildren(...nodes);
+};
+
+// ---------------------------------------------------------------------------
+// 返信キュー（お返しの営業）
+// ---------------------------------------------------------------------------
+
+export interface CounterHandlers {
+  onRemove: (to: string) => void;
+  onCopy: (mail: CounterMail) => void;
+}
+
+/**
+ * 溜まったお返しの営業を一覧する。
+ * **自動送信はしない。** 送るのは運用者が mailto: で自分のメールソフトを開いたときだけ。
+ * 宛先は入力されたままの未検証の値なので、目で見て判断させる必要がある。
+ */
+export const renderCounterQueue = (
+  host: HTMLElement,
+  queue: readonly CounterMail[],
+  handlers: CounterHandlers,
+): void => {
+  if (queue.length === 0) {
+    host.replaceChildren(
+      empty('お返しの営業はまだありません。営業と判定された送信があるとここに並びます。'),
+    );
+    return;
+  }
+
+  const list = el('div', 'mb-vstack');
+  list.style.gap = '0.75rem';
+
+  for (const mail of [...queue].reverse()) {
+    const card = el('div', 'mb-card');
+    card.style.padding = '0.9rem 1rem';
+
+    const head = el('div', 'mb-spread');
+    const to = el('div', 'mb-vstack');
+    to.style.gap = '0.1rem';
+    const address = el('b', 'mb-mono', mail.to);
+    address.style.fontSize = '0.86rem';
+    to.append(address, el('span', 'mb-note', mail.subject));
+
+    const score = el('span', `mb-pill mb-pill--block`);
+    score.textContent = `営業らしさ ${mail.context.salesScore.toFixed(2)}`;
+    head.append(to, score);
+
+    const body = el('pre');
+    body.style.marginTop = '0.7rem';
+    body.style.maxHeight = '9rem';
+    body.style.overflowY = 'auto';
+    body.style.fontSize = '0.74rem';
+    body.textContent = mail.body;
+
+    const actions = el('div', 'mb-wrap');
+    actions.style.marginTop = '0.7rem';
+
+    const send = el('a', 'mb-btn mb-btn--primary', 'メールソフトで開く');
+    send.href = mailtoUrl(mail);
+    send.rel = 'noopener';
+
+    const copy = el('button', 'mb-btn', '文面をコピー');
+    copy.type = 'button';
+    copy.addEventListener('click', () => handlers.onCopy(mail));
+
+    const remove = el('button', 'mb-btn mb-btn--danger', '削除');
+    remove.type = 'button';
+    remove.addEventListener('click', () => handlers.onRemove(mail.to));
+
+    actions.append(send, copy, remove);
+
+    const meta = el(
+      'p',
+      'mb-note',
+      `${new Date(mail.context.at).toLocaleString('ja-JP')} · ${mail.context.path || '/'} · 総合 ${mail.context.score.toFixed(2)}`,
+    );
+    meta.style.marginTop = '0.5rem';
+
+    card.append(head, body, actions, meta);
+    list.append(card);
+  }
+
+  host.replaceChildren(list);
 };

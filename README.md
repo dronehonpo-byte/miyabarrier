@@ -10,7 +10,7 @@
 
 ```html
 <script
-  src="https://cdn.jsdelivr.net/gh/dronehonpo-byte/miyabarrier@v0.3.0/packages/widget/dist/miyabarrier.min.js"
+  src="https://cdn.jsdelivr.net/gh/dronehonpo-byte/miyabarrier@v0.4.0/packages/widget/dist/miyabarrier.min.js"
   defer
 ></script>
 ```
@@ -82,7 +82,7 @@ Miyabarrier は 3 つすべてを対象にします。「機械かどうか」�
 
 ```html
 <script
-  src="https://cdn.jsdelivr.net/gh/dronehonpo-byte/miyabarrier@v0.3.0/packages/widget/dist/miyabarrier.min.js"
+  src="https://cdn.jsdelivr.net/gh/dronehonpo-byte/miyabarrier@v0.4.0/packages/widget/dist/miyabarrier.min.js"
   data-mode="block"
   data-badge="inline"
   defer
@@ -119,7 +119,7 @@ import {
   protect,
   protectAll,
   analyzeText,
-} from 'https://cdn.jsdelivr.net/gh/dronehonpo-byte/miyabarrier@v0.3.0/packages/widget/dist/miyabarrier.esm.js';
+} from 'https://cdn.jsdelivr.net/gh/dronehonpo-byte/miyabarrier@v0.4.0/packages/widget/dist/miyabarrier.esm.js';
 
 // 個別に保護する
 protect('#contact-form', {
@@ -159,6 +159,66 @@ window.Miyabarrier.getLog();
 ```
 
 また、単独ではブロックに届かないよう意図的に配点を抑えているシグナルがあります。たとえば Layer 2.6（不自然な自然さ）は最大でもブロックに届きません。支援デバイス（視線入力・スイッチ入力など）の利用者は操作が機械的に均一になりうるため、統計的な均一さだけで送信を止めない設計です。
+
+## お返しの営業（カウンターピッチ）
+
+営業と判定した送信に対して、**自社の営業文を用意しておいて返す**機能です。
+文面はテンプレートで、入力された氏名・スコア・サイト名などを差し込めます。
+
+```html
+<script>
+  window.MIYABARRIER_CONFIG = {
+    counter: {
+      enabled: true, // 既定は false
+      minSalesScore: 0.6, // 「営業らしさ」がこの値以上のときだけ作る
+      showOnScreen: true, // ブロック画面にも文面を出す（相手にその場で読ませる）
+      subject: '【{{site}}】お問い合わせへのご返信',
+      body: `{{name}} 様
+
+お問い合わせありがとうございます。いただいた内容は営業のご案内と判断したため、
+恐れ入りますが対応いたしかねます。
+
+せっかくのご縁ですので、当社からもご案内をお送りいたします。
+（ここに自社のサービス紹介を書いてください）`,
+    },
+  };
+</script>
+```
+
+使えるプレースホルダ: `{{name}}` `{{email}}` `{{site}}` `{{path}}` `{{score}}` `{{salesScore}}` `{{reasons}}` `{{date}}`
+
+### 自動送信はしません（意図的な設計です）
+
+フォームに入力されたアドレスへ広告メールを自動送信することはしません。生成した文面は
+**下書きとして送信箱（localStorage）に溜まり**、[ダッシュボード](#ダッシュボード判定ログの可視化)の
+「お返しの営業（下書き）」から、宛先と内容を確認して**あなた自身のメールソフトで**送ります。
+
+理由は 3 つあります。
+
+1. **法令** — 日本の特定電子メール法は、広告・宣伝メールを原則オプトイン（事前同意）としています。
+   フォームに入力された直後のアドレスは、同意を得た宛先ではありません。
+2. **なりすまし** — 入力されたアドレスは検証されていません。bot が第三者のアドレスを書き込めば、
+   自動送信は「無関係な人にスパムを送る」加害行為になります（バックスキャッタ）。
+3. **配信評価** — 自動返信の連鎖や苦情で、自社ドメインの送信評価（レピュテーション）が落ちます。
+
+自社サーバー経由で自動化したい場合は `onCounter` フックから渡せます。そこから先は運用者の判断です。
+
+```js
+window.MIYABARRIER_CONFIG = {
+  counter: { enabled: true /* … */ },
+  onCounter(mail) {
+    // mail.to / mail.subject / mail.body / mail.context
+    // 送信の可否・同意の有無・レート制限は、この先の実装で必ず担保してください
+  },
+};
+```
+
+送信箱は API からも触れます。
+
+```js
+Miyabarrier.getCounterQueue(); // 溜まっている下書き
+Miyabarrier.clearCounterQueue(); // すべて破棄
+```
 
 ## ダッシュボード（判定ログの可視化）
 
@@ -284,7 +344,8 @@ packages/widget/    DOM への注入・計測・UI・スクリプトタグのエ
 packages/dashboard/ 判定ログを可視化する静的ページ
 patterns/           NG ワードとスコア重み（JSON。ここが編集の入口）
 scripts/            patterns → TS の生成、バンドル、デモサーバー
-examples/demo.html  デモページ
+examples/demo.html  デモページ（保護前 / 保護後の比較）
+examples/embedded.html 実サイト埋め込み時の見た目の確認用ページ
 ```
 
 `patterns/*.json` は `scripts/build-patterns.mjs` が `packages/core/src/patterns.data.ts` に埋め込みます（外部 fetch なしで動かすため）。JSON を編集したら `npm run gen` を実行してください。忘れてもテストが検出します。

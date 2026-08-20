@@ -1,4 +1,4 @@
-/*! Miyabarrier v0.3.0 | MIT License | https://github.com/dronehonpo-byte/miyabarrier */
+/*! Miyabarrier v0.4.0 | MIT License | https://github.com/dronehonpo-byte/miyabarrier */
 "use strict";
 (() => {
   // ../core/src/util.ts
@@ -1837,6 +1837,7 @@
     var _a, _b;
     const bodyParts = [];
     let senderName = "";
+    let email = "";
     let typedChars = 0;
     const elements = form.querySelectorAll("input, textarea");
     for (const element of elements) {
@@ -1848,10 +1849,11 @@
       const type = element instanceof HTMLInputElement ? element.type : "textarea";
       const identity = `${element.name} ${element.id} ${(_b = element.getAttribute("placeholder")) != null ? _b : ""}`;
       if (!senderName && NAME_FIELD_PATTERN.test(identity)) senderName = value;
+      if (!email && (type === "email" || /mail/i.test(identity))) email = value.trim();
       if (NON_BODY_TYPES.has(type)) continue;
       bodyParts.push(value);
     }
-    return { text: bodyParts.join("\n"), senderName, typedChars };
+    return { text: bodyParts.join("\n"), senderName, email, typedChars };
   };
   var findForms = (doc, selector) => {
     if (selector) return [...doc.querySelectorAll(selector)];
@@ -2065,6 +2067,92 @@
   var clearLog = () => {
     try {
       localStorage.removeItem(LOG_STORAGE_KEY);
+    } catch {
+    }
+  };
+
+  // src/counter.ts
+  var COUNTER_STORAGE_KEY = "miyabarrier:counter";
+  var defaultCounterOptions = {
+    enabled: false,
+    minSalesScore: 0.6,
+    subject: "ご連絡ありがとうございます（{{site}} より）",
+    body: `{{name}} 様
+
+お問い合わせフォームよりご連絡いただきありがとうございます。
+いただいた内容は営業・勧誘のご案内と判断したため、恐れ入りますが対応いたしかねます。
+
+せっかくのご縁ですので、こちらからもご案内をお送りいたします。
+（ここに自社のサービス紹介を書いてください）
+
+{{site}}
+`,
+    showOnScreen: true,
+    queueLimit: 50
+  };
+  var EMAIL_PATTERN = /^[^\s@]+@[^\s@.]+\.[^\s@]{2,}$/;
+  var isPlausibleEmail = (value) => value.length <= 254 && EMAIL_PATTERN.test(value.trim());
+  var shouldCounter = (options, input) => {
+    if (!options.enabled) return { ok: false, reason: "無効" };
+    if (input.verdict === "pass") return { ok: false, reason: "通過した送信" };
+    if (!input.salesApplicable) return { ok: false, reason: "文面が判定対象外（短すぎるなど）" };
+    if (input.salesScore < options.minSalesScore) {
+      return { ok: false, reason: `営業らしさ ${input.salesScore.toFixed(2)} がしきい値未満` };
+    }
+    if (!isPlausibleEmail(input.email)) return { ok: false, reason: "有効なメールアドレスがない" };
+    return { ok: true };
+  };
+  var renderTemplate = (template, context) => template.replace(/\{\{\s*(\w+)\s*\}\}/g, (_match, key) => {
+    switch (key) {
+      case "name":
+        return context.name || "ご担当者";
+      case "email":
+        return context.email;
+      case "score":
+        return context.score.toFixed(2);
+      case "salesScore":
+        return context.salesScore.toFixed(2);
+      case "reasons":
+        return context.reasons.join("\n");
+      case "site":
+        return context.site;
+      case "path":
+        return context.path;
+      case "date":
+        return context.at.slice(0, 10);
+      default:
+        return "";
+    }
+  });
+  var buildCounterMail = (options, context) => ({
+    to: context.email.trim(),
+    subject: renderTemplate(options.subject, context).replace(/\s+/g, " ").trim(),
+    body: renderTemplate(options.body, context),
+    context
+  });
+  var readCounterQueue = () => {
+    try {
+      const raw = localStorage.getItem(COUNTER_STORAGE_KEY);
+      const parsed = raw ? JSON.parse(raw) : [];
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
+  };
+  var queueCounterMail = (mail, limit) => {
+    try {
+      const queue = readCounterQueue();
+      if (queue.some((entry) => entry.to.toLowerCase() === mail.to.toLowerCase())) return "duplicate";
+      const next = [...queue, mail].slice(-Math.max(1, limit));
+      localStorage.setItem(COUNTER_STORAGE_KEY, JSON.stringify(next));
+      return "queued";
+    } catch {
+      return "failed";
+    }
+  };
+  var clearCounterQueue = () => {
+    try {
+      localStorage.removeItem(COUNTER_STORAGE_KEY);
     } catch {
     }
   };
@@ -2305,10 +2393,38 @@ ${selector} {${LIGHT}}
 }
 .mb-guard__brand svg { width: 1.35em; height: 1.35em; }
 
+/* 送信できたとき / 止めたときに、この行の見た目でも状態を伝える */
+.mb-guard--verified { border-color: var(--mb-pass-line); background: var(--mb-pass-soft); }
+.mb-guard--flagged { border-color: var(--mb-review-line); background: var(--mb-review-soft); }
+.mb-guard--blocked { border-color: var(--mb-block-line); background: var(--mb-block-soft); }
+.mb-guard__state {
+  flex: 0 0 auto;
+  display: none;
+  align-items: center;
+  gap: 0.3em;
+  font-size: 0.78em;
+  font-weight: 560;
+  white-space: nowrap;
+}
+.mb-guard--verified .mb-guard__state,
+.mb-guard--flagged .mb-guard__state,
+.mb-guard--blocked .mb-guard__state { display: flex; }
+.mb-guard--verified .mb-guard__state { color: var(--mb-pass); }
+.mb-guard--flagged .mb-guard__state { color: var(--mb-review); }
+.mb-guard--blocked .mb-guard__state { color: var(--mb-block); }
+/* 状態が出たらブランド表記は引っ込める（横幅を食い合わないように） */
+.mb-guard--verified .mb-guard__brand span,
+.mb-guard--flagged .mb-guard__brand span,
+.mb-guard--blocked .mb-guard__brand span { display: none; }
+.mb-guard__state svg { width: 1.1em; height: 1.1em; }
+
 /* ---------- バッジ ---------- */
 
+/* 送信ボタンと同じ行に並ばないよう、通常のバッジは行を独立させる */
 .mb-badge {
-  display: inline-flex;
+  display: flex;
+  width: -moz-fit-content;
+  width: fit-content;
   align-items: center;
   gap: 0.4em;
   margin: 0.6em 0;
@@ -2320,6 +2436,7 @@ ${selector} {${LIGHT}}
 .mb-badge:hover { color: var(--mb-brand-600); text-decoration: none; }
 .mb-badge svg { width: 1.25em; height: 1.25em; }
 .mb-badge--floating {
+  display: inline-flex;
   position: fixed;
   right: 14px;
   bottom: 14px;
@@ -2472,6 +2589,44 @@ ${selector} {${LIGHT}}
 }
 .mb-panel--block .mb-panel__reasons li:first-child::before { background: var(--mb-block); }
 
+/* お返しの営業（相手にその場で読ませる文面） */
+.mb-counter {
+  border-top: 1px solid var(--mb-line);
+  padding: 0.9em 1.1em 1em 1.2em;
+  background: var(--mb-brand-050);
+}
+.mb-counter__head {
+  display: flex;
+  align-items: center;
+  gap: 0.45em;
+  font-size: 0.8em;
+  font-weight: 600;
+  color: var(--mb-brand-800);
+  margin-bottom: 0.45em;
+}
+.mb-counter__head svg { width: 1.1em; height: 1.1em; }
+.mb-counter__subject {
+  font-size: 0.84em;
+  font-weight: 560;
+  color: var(--mb-ink-900);
+  margin: 0 0 0.3em;
+}
+.mb-counter__body {
+  margin: 0;
+  font-family: inherit;
+  font-size: 0.82em;
+  line-height: 1.75;
+  color: var(--mb-ink-700);
+  white-space: pre-wrap;
+  max-height: 11em;
+  overflow-y: auto;
+}
+.mb-counter__note {
+  margin: 0.5em 0 0;
+  font-size: 0.74em;
+  color: var(--mb-ink-400);
+}
+
 /* 操作 */
 .mb-panel__actions {
   display: flex;
@@ -2596,11 +2751,32 @@ ${selector} {${LIGHT}}
     input.id = `${name}-${Math.random().toString(36).slice(2, 8)}`;
     field.htmlFor = input.id;
     field.append(input, el(doc, "span", "mb-guard__label", label));
+    const state = el(doc, "span", "mb-guard__state");
+    state.setAttribute("aria-live", "polite");
     const brand = el(doc, "span", "mb-guard__brand");
     brand.title = "Miyabarrier が送信内容を端末内で検証します（外部送信なし）";
     brand.append(mark(doc, "guard"), el(doc, "span", void 0, "Miyabarrier"));
-    wrapper.append(field, brand);
+    wrapper.append(field, state, brand);
     return { wrapper, input };
+  };
+  var GUARD_STATE_TEXT = {
+    verified: "確認しました",
+    review: "確認が必要です",
+    blocked: "送信を止めました"
+  };
+  var setGuardState = (wrapper, next) => {
+    if (!wrapper) return;
+    wrapper.classList.remove("mb-guard--verified", "mb-guard--flagged", "mb-guard--blocked");
+    const state = wrapper.querySelector(".mb-guard__state");
+    if (!state) return;
+    if (next === "idle") {
+      state.textContent = "";
+      return;
+    }
+    wrapper.classList.add(
+      next === "verified" ? "mb-guard--verified" : next === "review" ? "mb-guard--flagged" : "mb-guard--blocked"
+    );
+    state.textContent = GUARD_STATE_TEXT[next];
   };
   var createBadge = (doc, floating) => {
     const badge = el(doc, "a", `mb-root mb-badge${floating ? " mb-badge--floating" : ""}`);
@@ -2692,6 +2868,18 @@ ${selector} {${LIGHT}}
       }
       panel.append(list);
     }
+    if (options.counter) {
+      const counter = el(doc, "div", "mb-counter");
+      const head2 = el(doc, "div", "mb-counter__head");
+      head2.append(mark(doc, "counter"), el(doc, "span", void 0, "こちらからのご案内"));
+      counter.append(
+        head2,
+        el(doc, "p", "mb-counter__subject", options.counter.subject),
+        el(doc, "p", "mb-counter__body", options.counter.body),
+        el(doc, "p", "mb-counter__note", `${options.counter.to} 宛の返信文を控えました。`)
+      );
+      panel.append(counter);
+    }
     const actions = el(doc, "div", "mb-panel__actions");
     if (options.onOverride) {
       const button = el(
@@ -2766,7 +2954,7 @@ ${selector} {${LIGHT}}
   };
 
   // src/index.ts
-  var VERSION = true ? "0.3.0" : "0.0.0";
+  var VERSION = true ? "0.4.0" : "0.0.0";
   var defaultOptions = {
     mode: "block",
     checkbox: true,
@@ -2779,7 +2967,8 @@ ${selector} {${LIGHT}}
     debug: false,
     log: true,
     logLimit: 200,
-    autoInit: true
+    autoInit: true,
+    counter: defaultCounterOptions
   };
   var scriptElement = typeof document === "undefined" ? null : document.currentScript;
   var parseBoolean = (value, fallback) => {
@@ -2878,6 +3067,10 @@ ${selector} {${LIGHT}}
     mountCheckbox(doc) {
       const { wrapper, input } = createCheckbox(doc, this.options.checkboxLabel, "mb_confirm");
       this.checkboxInput = input;
+      this.checkboxRow = wrapper;
+      const reset = () => setGuardState(this.checkboxRow, "idle");
+      this.form.addEventListener("input", reset, { passive: true });
+      this.cleanups.push(() => this.form.removeEventListener("input", reset));
       input.addEventListener("click", (event) => {
         this.toggleCount += 1;
         this.trustedClick = event.isTrusted;
@@ -2928,13 +3121,52 @@ ${selector} {${LIGHT}}
         { weights: this.weights, ngWords: this.ngWords }
       );
     }
-    showPanel(result, allowOverride) {
+    /**
+     * 営業と判定したときに、お返しの営業文を組み立てて送信箱に積む。
+     * ネットワークへは出さない（理由は counter.ts のコメント参照）。
+     */
+    buildCounter(result) {
+      var _a, _b, _c, _d, _e;
+      const options = this.options.counter;
+      const sales = result.groups.find((group) => group.group === "sales");
+      const values = collectFormValues(this.form);
+      const decision = shouldCounter(options, {
+        verdict: result.verdict,
+        salesApplicable: (_a = sales == null ? void 0 : sales.applicable) != null ? _a : false,
+        salesScore: (_b = sales == null ? void 0 : sales.score) != null ? _b : 0,
+        email: values.email
+      });
+      if (!decision.ok) {
+        if (this.options.debug && options.enabled) {
+          console.warn("[miyabarrier] お返しの営業は作りませんでした:", decision.reason);
+        }
+        return void 0;
+      }
+      const mail = buildCounterMail(options, {
+        email: values.email,
+        name: values.senderName,
+        score: result.score,
+        salesScore: (_c = sales == null ? void 0 : sales.score) != null ? _c : 0,
+        reasons: result.reasons.slice(0, 3),
+        site: typeof location === "undefined" ? "" : location.hostname,
+        path: typeof location === "undefined" ? "" : location.pathname,
+        at: (/* @__PURE__ */ new Date()).toISOString()
+      });
+      const queued = queueCounterMail(mail, options.queueLimit);
+      if (this.options.debug) {
+        console.warn("[miyabarrier] お返しの営業を送信箱に積みました:", queued, mail.to);
+      }
+      (_e = (_d = this.options).onCounter) == null ? void 0 : _e.call(_d, mail, { form: this.form });
+      return mail;
+    }
+    showPanel(result, allowOverride, counterMail) {
       var _a, _b;
       (_a = this.panel) == null ? void 0 : _a.remove();
       const panel = createPanel(this.form.ownerDocument, {
         message: result.verdict === "block" ? this.options.blockMessage : this.options.reviewMessage,
         result,
         debug: this.options.debug,
+        ...counterMail && this.options.counter.showOnScreen ? { counter: counterMail } : {},
         ...allowOverride ? {
           onOverride: () => {
             var _a2;
@@ -2986,6 +3218,11 @@ ${selector} {${LIGHT}}
       if (this.options.debug) {
         console.warn("[miyabarrier]", result.verdict, result.score, result.reasons, result);
       }
+      const counterMail = this.buildCounter(result);
+      setGuardState(
+        this.checkboxRow,
+        result.verdict === "pass" ? "verified" : result.verdict === "review" ? "review" : "blocked"
+      );
       if (this.options.mode === "report" || overriddenByHook || result.verdict === "pass") {
         (_c = this.panel) == null ? void 0 : _c.remove();
         this.panel = void 0;
@@ -2994,7 +3231,7 @@ ${selector} {${LIGHT}}
       const allowOverride = this.options.mode === "warn" || result.verdict === "review";
       event.preventDefault();
       event.stopImmediatePropagation();
-      this.showPanel(result, allowOverride);
+      this.showPanel(result, allowOverride, counterMail);
     }
     destroy() {
       var _a, _b;
@@ -3046,6 +3283,8 @@ ${selector} {${LIGHT}}
     analyzeText,
     getLog,
     clearLog: clearLog2,
+    getCounterQueue: readCounterQueue,
+    clearCounterQueue,
     destroyAll,
     defaultOptions,
     defaultWeights,

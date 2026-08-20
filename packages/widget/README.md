@@ -6,7 +6,7 @@
 
 ```html
 <script
-  src="https://cdn.jsdelivr.net/gh/dronehonpo-byte/miyabarrier@v0.3.0/packages/widget/dist/miyabarrier.min.js"
+  src="https://cdn.jsdelivr.net/gh/dronehonpo-byte/miyabarrier@v0.4.0/packages/widget/dist/miyabarrier.min.js"
   data-mode="block"
   defer
 ></script>
@@ -19,7 +19,7 @@
 npm には未公開です。当面は CDN の ESM ビルドをそのまま import してください。
 
 ```js
-import { protect } from 'https://cdn.jsdelivr.net/gh/dronehonpo-byte/miyabarrier@v0.3.0/packages/widget/dist/miyabarrier.esm.js';
+import { protect } from 'https://cdn.jsdelivr.net/gh/dronehonpo-byte/miyabarrier@v0.4.0/packages/widget/dist/miyabarrier.esm.js';
 ```
 
 ```js
@@ -27,7 +27,7 @@ import {
   protect,
   analyzeText,
   getLog,
-} from 'https://cdn.jsdelivr.net/gh/dronehonpo-byte/miyabarrier@v0.3.0/packages/widget/dist/miyabarrier.esm.js';
+} from 'https://cdn.jsdelivr.net/gh/dronehonpo-byte/miyabarrier@v0.4.0/packages/widget/dist/miyabarrier.esm.js';
 
 const guard = protect('#contact-form', {
   mode: 'warn',

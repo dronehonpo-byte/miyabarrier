@@ -10,6 +10,12 @@
 // widget の index ではなく log モジュールだけを読む（index は自動初期化の副作用を持つ）。
 import { LOG_STORAGE_KEY } from '@miyabarrier/widget/log';
 import {
+  clearCounterQueue,
+  readCounterQueue,
+  removeCounterMail,
+  type CounterMail,
+} from '@miyabarrier/widget/counter';
+import {
   byDay,
   parseLog,
   scoreHistogram,
@@ -21,6 +27,7 @@ import {
 } from './aggregate';
 import {
   mountMark,
+  renderCounterQueue,
   renderDaily,
   renderHistogram,
   renderRanked,
@@ -70,10 +77,33 @@ const renderAll = (): void => {
     summary,
   );
   renderTable($('log'), entries);
+  renderCounter();
 
   const origin = typeof location === 'undefined' ? '' : location.origin;
   $('topbar-context').textContent =
     entries.length === 0 ? `検知ログ · ${origin}` : `${entries.length} 件の記録 · ${origin}`;
+};
+
+/** お返しの営業の一覧を描き直す。 */
+const renderCounter = (): void => {
+  const queue = readCounterQueue();
+  $('counter-count').textContent = queue.length === 0 ? '0 件' : `${queue.length} 件`;
+  renderCounterQueue($('counter'), queue, {
+    onRemove: (to) => {
+      removeCounterMail(to);
+      renderCounter();
+    },
+    onCopy: (mail: CounterMail) => {
+      const text = `To: ${mail.to}
+Subject: ${mail.subject}
+
+${mail.body}`;
+      void navigator.clipboard?.writeText(text).then(
+        () => setStatus('文面をコピーしました。'),
+        () => setStatus('コピーできませんでした。手動で選択してください。', 'warn'),
+      );
+    },
+  });
 };
 
 const setStatus = (message: string, tone: 'info' | 'warn' = 'info'): void => {
@@ -125,7 +155,16 @@ const bind = (): void => {
     $(id).addEventListener('input', renderAll);
   }
 
-  $('reload').addEventListener('click', loadFromStorage);
+  $('reload').addEventListener('click', () => {
+    loadFromStorage();
+    renderCounter();
+  });
+
+  $('counter-clear').addEventListener('click', () => {
+    if (!confirm('お返しの営業の下書きをすべて削除します。続けますか？')) return;
+    clearCounterQueue();
+    renderCounter();
+  });
 
   $('import').addEventListener('click', () => {
     const textarea = document.getElementById('import-json') as HTMLTextAreaElement;

@@ -32,6 +32,7 @@ await esbuild.build({
     '@miyabarrier/design/logo': join(root, 'packages', 'design', 'src', 'logo.ts'),
     '@miyabarrier/design/tokens': join(root, 'packages', 'design', 'src', 'tokens.ts'),
     '@miyabarrier/widget/log': join(root, 'packages', 'widget', 'src', 'log.ts'),
+    '@miyabarrier/widget/counter': join(root, 'packages', 'widget', 'src', 'counter.ts'),
   },
   banner: { js: '/*! Miyabarrier dashboard | MIT License */' },
   logLevel: 'warning',

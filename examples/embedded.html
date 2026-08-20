@@ -1,0 +1,369 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>お問い合わせ｜山田工務店</title>
+    <meta
+      name="description"
+      content="Miyabarrier を実際のサイトに埋め込んだときの見た目を確認するためのページ。ライブラリのデザインには合わせず、よくある工務店サイト風の独自 CSS で作っている。"
+    />
+    <style>
+      /*
+        ここは「よくある会社サイト」を模した独自の CSS。
+        Miyabarrier のデザイントークンは一切読み込んでいない。
+        フォント・色・角丸・行間をあえてライブラリと違う値にして、
+        埋め込んだ UI が周囲から浮かないか / 相手の CSS で壊れないかを見るためのページ。
+      */
+      :root {
+        --site-ink: #2b2723;
+        --site-muted: #6f665e;
+        --site-line: #e0d8cd;
+        --site-bg: #fbf8f4;
+        --site-accent: #8a6d3b;
+        --site-accent-dark: #6d5429;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        font-family: 'Hiragino Mincho ProN', 'Yu Mincho', 'Noto Serif JP', serif;
+        color: var(--site-ink);
+        background: var(--site-bg);
+        line-height: 1.9;
+        font-size: 16px;
+      }
+      header {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        padding: 1.1rem 2rem;
+        background: #fff;
+        border-bottom: 1px solid var(--site-line);
+      }
+      header b {
+        font-size: 1.15rem;
+        letter-spacing: 0.12em;
+      }
+      header nav {
+        margin-left: auto;
+        display: flex;
+        gap: 1.5rem;
+        font-size: 0.9rem;
+      }
+      header nav a {
+        color: var(--site-muted);
+        text-decoration: none;
+      }
+      .hero {
+        padding: 3.5rem 2rem 2.5rem;
+        text-align: center;
+        background: #fff;
+        border-bottom: 1px solid var(--site-line);
+      }
+      .hero h1 {
+        margin: 0 0 0.6rem;
+        font-size: clamp(1.6rem, 4vw, 2.2rem);
+        font-weight: 500;
+        letter-spacing: 0.08em;
+      }
+      .hero p {
+        margin: 0;
+        color: var(--site-muted);
+        font-size: 0.95rem;
+      }
+      main {
+        max-width: 720px;
+        margin: 0 auto;
+        padding: 2.5rem 1.5rem 4rem;
+      }
+      h2 {
+        font-size: 1.25rem;
+        font-weight: 500;
+        letter-spacing: 0.08em;
+        margin: 0 0 0.4rem;
+        padding-bottom: 0.6rem;
+        border-bottom: 2px solid var(--site-accent);
+      }
+      .lead {
+        color: var(--site-muted);
+        font-size: 0.92rem;
+        margin: 0 0 2rem;
+      }
+      form {
+        background: #fff;
+        border: 1px solid var(--site-line);
+        padding: 2rem;
+      }
+      .row {
+        margin-bottom: 1.4rem;
+      }
+      label.field {
+        display: block;
+        font-size: 0.88rem;
+        letter-spacing: 0.06em;
+        margin-bottom: 0.4rem;
+      }
+      label.field .req {
+        color: #a5442f;
+        font-size: 0.78rem;
+        margin-left: 0.4em;
+      }
+      input[type='text'],
+      input[type='email'],
+      input[type='tel'],
+      textarea {
+        width: 100%;
+        font-family: inherit;
+        font-size: 0.95rem;
+        line-height: 1.8;
+        padding: 0.65rem 0.8rem;
+        color: var(--site-ink);
+        background: #fdfcfa;
+        border: 1px solid #cfc5b6;
+        border-radius: 2px;
+      }
+      input:focus,
+      textarea:focus {
+        outline: 2px solid var(--site-accent);
+        outline-offset: 1px;
+      }
+      textarea {
+        min-height: 9rem;
+        resize: vertical;
+      }
+      .consent {
+        font-size: 0.85rem;
+        color: var(--site-muted);
+        display: flex;
+        gap: 0.5rem;
+        align-items: flex-start;
+        margin-bottom: 1.4rem;
+      }
+      button[type='submit'] {
+        font-family: inherit;
+        font-size: 1rem;
+        letter-spacing: 0.16em;
+        padding: 0.85rem 3rem;
+        color: #fff;
+        background: var(--site-accent);
+        border: 0;
+        border-radius: 2px;
+        cursor: pointer;
+      }
+      button[type='submit']:hover {
+        background: var(--site-accent-dark);
+      }
+      .thanks {
+        margin-top: 1.5rem;
+        padding: 1.2rem 1.4rem;
+        border: 1px solid #bcd4c0;
+        background: #f2f8f3;
+        font-size: 0.92rem;
+      }
+      footer {
+        padding: 2rem;
+        text-align: center;
+        font-size: 0.8rem;
+        color: var(--site-muted);
+        border-top: 1px solid var(--site-line);
+        background: #fff;
+      }
+      /* 検証用のバー（本物のサイトには無いもの） */
+      .harness {
+        position: sticky;
+        top: 0;
+        z-index: 50;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        background: #2b2723;
+        color: #f4efe8;
+        font-family: ui-sans-serif, system-ui, sans-serif;
+        font-size: 0.78rem;
+      }
+      .harness b {
+        letter-spacing: 0.08em;
+        margin-right: 0.5rem;
+      }
+      .harness button {
+        font: inherit;
+        padding: 0.25rem 0.7rem;
+        color: #f4efe8;
+        background: #443c34;
+        border: 1px solid #5d5349;
+        border-radius: 3px;
+        cursor: pointer;
+      }
+      .harness button:hover {
+        background: #574d43;
+      }
+      .harness span {
+        margin-left: auto;
+        opacity: 0.7;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- 検証用: 実サイトには存在しないテスト操作バー -->
+    <div class="harness">
+      <b>検証用</b>
+      <button type="button" data-fill="legit">正当な問い合わせを入れる</button>
+      <button type="button" data-fill="sales">営業メールを入れる</button>
+      <button type="button" data-fill="ai">AI営業文を入れる</button>
+      <button type="button" data-fill="clear">クリア</button>
+      <span>Miyabarrier を 1 行埋め込んだ状態</span>
+    </div>
+
+    <header>
+      <b>山田工務店</b>
+      <nav>
+        <a href="#">施工事例</a>
+        <a href="#">リフォーム</a>
+        <a href="#">会社概要</a>
+        <a href="#">お問い合わせ</a>
+      </nav>
+    </header>
+
+    <div class="hero">
+      <h1>住まいのご相談を承ります</h1>
+      <p>創業三十五年、地域の住まいを守り続けています</p>
+    </div>
+
+    <main>
+      <h2>お問い合わせ</h2>
+      <p class="lead">
+        リフォームのご相談、点検のご依頼などお気軽にご連絡ください。二営業日以内にご返信いたします。
+      </p>
+
+      <form id="contact" novalidate>
+        <div class="row">
+          <label class="field" for="name">お名前 <span class="req">必須</span></label>
+          <input type="text" id="name" name="name" autocomplete="name" />
+        </div>
+        <div class="row">
+          <label class="field" for="email">メールアドレス <span class="req">必須</span></label>
+          <input type="email" id="email" name="email" autocomplete="email" />
+        </div>
+        <div class="row">
+          <label class="field" for="tel">お電話番号</label>
+          <input type="tel" id="tel" name="tel" autocomplete="tel" />
+        </div>
+        <div class="row">
+          <label class="field" for="message">ご相談内容 <span class="req">必須</span></label>
+          <textarea id="message" name="message"></textarea>
+        </div>
+
+        <div class="consent">
+          <input type="checkbox" id="privacy" name="privacy" />
+          <label for="privacy">個人情報の取り扱いについて同意します</label>
+        </div>
+
+        <button type="submit">送信する</button>
+      </form>
+
+      <div id="thanks"></div>
+    </main>
+
+    <footer>山田工務店 / 〒000-0000 ○○県○○市○○ 1-2-3 / TEL 000-000-0000</footer>
+
+    <!-- ▼ サイト運営者が書く設定（お返しの営業の文面。任意） -->
+    <script>
+      window.MIYABARRIER_CONFIG = {
+        counter: {
+          enabled: true,
+          minSalesScore: 0.6,
+          showOnScreen: true,
+          queueLimit: 50,
+          subject: '【山田工務店】お問い合わせへのご返信',
+          body: `{{name}} 様
+
+お問い合わせフォームよりご連絡いただきありがとうございます。
+いただいた内容は営業・勧誘のご案内と判断したため、恐れ入りますが対応いたしかねます。
+
+せっかくのご縁ですので、当社からもご案内をお送りいたします。
+山田工務店では創業35年の施工実績をもとに、住宅リフォームから店舗改装まで承っております。
+オフィスの内装や外壁の点検をご検討の際は、ぜひ一度お声がけください。
+
+  ・無料の現地調査を承っています
+  ・地域密着35年、アフター点検も自社対応です
+
+山田工務店 / TEL 000-000-0000
+{{site}}`,
+        },
+      };
+    </script>
+
+    <!-- ▼ サイト運営者が貼る 1 行はこれだけ -->
+    <script src="../packages/widget/dist/miyabarrier.js" data-mode="block" defer></script>
+
+    <script>
+      // 検証用のサンプル投入と、送信できたときの表示（本来はサイト側の実装）
+      const SAMPLES = {
+        legit: {
+          name: '鈴木一郎',
+          email: 'suzuki@example.com',
+          tel: '090-0000-0000',
+          message: `先日の点検でお世話になりました。浴室の換気扇から異音がするようになったので、一度見ていただけますか。
+週末なら在宅しています。日程はご都合に合わせます。よろしくお願いします。`,
+        },
+        sales: {
+          name: '田中太郎',
+          email: 'tanaka@example-sales.co.jp',
+          tel: '03-1234-5678',
+          message: `突然のご連絡失礼いたします。株式会社サンプルマーケティングの田中と申します。
+貴社ホームページを拝見し、ぜひご提案させていただきたくご連絡いたしました。
+弊社では中小企業様向けにSEO対策とホームページ制作を提供しており、導入実績は300社を超えております。
+検索順位の改善による集客力の向上と、業務効率化によるコスト削減を同時に実現できます。
+初期費用0円のキャンペーン中で、まずは無料診断からお試しいただけます。
+つきましては、30分ほどオンライン面談のお時間をいただけないでしょうか。ご都合のよい候補日をお知らせください。
+なお、本メールは営業目的でお送りしております。ご不要でしたら配信停止のご連絡をお願いいたします。`,
+        },
+        ai: {
+          name: '佐藤',
+          email: 'sato@example.com',
+          tel: '',
+          message: `お世話になっております。この度は貴社の事業内容を拝見しご連絡いたしました。
+弊社では業務効率化を支援するサービスを提供しております。導入により生産性向上が期待できます。
+主なメリットは以下の通りです。
+・定型業務の工数削減を実現できます
+・部門横断でのデータ連携が可能になります
+・段階的な導入によりリスクを抑えられます
+ご検討いただける場合は、詳細な資料をお送りいたします。
+つきましては、一度お打ち合わせのお時間をいただけますと幸いです。
+ご確認のほど、何卒よろしくお願い申し上げます。`,
+        },
+      };
+
+      const form = document.getElementById('contact');
+      const set = (name, value) => {
+        const field = form.querySelector(`[name="${name}"]`);
+        if (!field) return;
+        field.focus();
+        field.value = value;
+        field.dispatchEvent(new Event('input', { bubbles: true }));
+      };
+
+      for (const button of document.querySelectorAll('[data-fill]')) {
+        button.addEventListener('click', () => {
+          const sample = SAMPLES[button.dataset.fill];
+          set('name', sample?.name ?? '');
+          set('email', sample?.email ?? '');
+          set('tel', sample?.tel ?? '');
+          set('message', sample?.message ?? '');
+          document.getElementById('thanks').textContent = '';
+        });
+      }
+
+      // 送信できたとき（判定を通過したとき）はサイト側の完了表示が出る
+      form.addEventListener('submit', (event) => {
+        event.preventDefault();
+        document.getElementById('thanks').innerHTML =
+          '<div class="thanks">お問い合わせを受け付けました。二営業日以内にご返信いたします。</div>';
+      });
+    </script>
+  </body>
+</html>
