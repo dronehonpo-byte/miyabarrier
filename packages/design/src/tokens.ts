@@ -12,8 +12,7 @@
  */
 
 /** ライト／ダーク両方の CSS カスタムプロパティ。:root に一度だけ入れる。 */
-export const tokensCss = `
-:root {
+const LIGHT = `
   color-scheme: light dark;
 
   /* Miyabee ブルー */
@@ -67,49 +66,45 @@ export const tokensCss = `
   /* 書体 */
   --mb-font: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', 'Hiragino Sans',
     'Hiragino Kaku Gothic ProN', 'Noto Sans JP', 'Yu Gothic UI', sans-serif;
-  --mb-mono: ui-monospace, 'SF Mono', 'JetBrains Mono', 'Cascadia Mono', Menlo, Consolas, monospace;
-}
+  --mb-mono: ui-monospace, 'SF Mono', 'JetBrains Mono', 'Cascadia Mono', Menlo, Consolas, monospace;`;
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --mb-brand-050: #101a2e;
-    --mb-brand-100: #16233d;
-    --mb-brand-200: #24365c;
-    --mb-brand-400: #6f9bf5;
-    --mb-brand-500: #5b8df0;
-    --mb-brand-600: #7aa6f7;
-    --mb-brand-700: #9dbdfa;
-    --mb-brand-800: #c3d6fc;
+const DARK = `
+  --mb-brand-050: #101a2e;
+  --mb-brand-100: #16233d;
+  --mb-brand-200: #24365c;
+  --mb-brand-400: #6f9bf5;
+  --mb-brand-500: #5b8df0;
+  --mb-brand-600: #7aa6f7;
+  --mb-brand-700: #9dbdfa;
+  --mb-brand-800: #c3d6fc;
 
-    --mb-canvas: #080b12;
-    --mb-surface: #0f141f;
-    --mb-surface-2: #131926;
-    --mb-surface-inset: #161d2c;
-    --mb-line: #212a3b;
-    --mb-line-strong: #2f3a4f;
+  --mb-canvas: #080b12;
+  --mb-surface: #0f141f;
+  --mb-surface-2: #131926;
+  --mb-surface-inset: #161d2c;
+  --mb-line: #212a3b;
+  --mb-line-strong: #2f3a4f;
 
-    --mb-ink-900: #eef1f6;
-    --mb-ink-700: #ccd3e0;
-    --mb-ink-500: #93a0b6;
-    --mb-ink-400: #7a8699;
-    --mb-ink-300: #5d6878;
+  --mb-ink-900: #eef1f6;
+  --mb-ink-700: #ccd3e0;
+  --mb-ink-500: #93a0b6;
+  --mb-ink-400: #7a8699;
+  --mb-ink-300: #5d6878;
 
-    --mb-block: #f18a82;
-    --mb-block-soft: #24161a;
-    --mb-block-line: #4a2a28;
-    --mb-review: #e0b45c;
-    --mb-review-soft: #231c10;
-    --mb-review-line: #453a1e;
-    --mb-pass: #62c69f;
-    --mb-pass-soft: #10201b;
-    --mb-pass-line: #23453a;
+  --mb-block: #f18a82;
+  --mb-block-soft: #24161a;
+  --mb-block-line: #4a2a28;
+  --mb-review: #e0b45c;
+  --mb-review-soft: #231c10;
+  --mb-review-line: #453a1e;
+  --mb-pass: #62c69f;
+  --mb-pass-soft: #10201b;
+  --mb-pass-line: #23453a;
 
-    --mb-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
-    --mb-shadow-md: 0 4px 16px -4px rgba(0, 0, 0, 0.5), 0 1px 2px rgba(0, 0, 0, 0.4);
-    --mb-shadow-lg: 0 18px 48px -12px rgba(0, 0, 0, 0.7), 0 2px 6px rgba(0, 0, 0, 0.5);
-    --mb-ring: 0 0 0 3px rgba(122, 166, 247, 0.22);
-  }
-}
+  --mb-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --mb-shadow-md: 0 4px 16px -4px rgba(0, 0, 0, 0.5), 0 1px 2px rgba(0, 0, 0, 0.4);
+  --mb-shadow-lg: 0 18px 48px -12px rgba(0, 0, 0, 0.7), 0 2px 6px rgba(0, 0, 0, 0.5);
+  --mb-ring: 0 0 0 3px rgba(122, 166, 247, 0.22);
 `;
 
 /** 判定 3 値に対応するトークン名。widget / dashboard で同じ色になるように使う。 */
@@ -118,3 +113,23 @@ export const VERDICT_TOKENS = {
   review: { fg: 'var(--mb-review)', soft: 'var(--mb-review-soft)', line: 'var(--mb-review-line)' },
   block: { fg: 'var(--mb-block)', soft: 'var(--mb-block-soft)', line: 'var(--mb-block-line)' },
 } as const;
+
+/** :root に一度だけ入れる形（dashboard / demo 用）。 */
+export const tokensCss = `
+:root {${LIGHT}}
+@media (prefers-color-scheme: dark) {
+  :root {${DARK}}
+}
+`;
+
+/**
+ * 任意のセレクタに閉じ込めた形（widget 用）。
+ * 埋め込み先サイトの :root にカスタムプロパティを撒かないため、
+ * widget は自分のルート要素（.mb-root）にだけトークンを定義する。
+ */
+export const scopedTokensCss = (selector: string): string => `
+${selector} {${LIGHT}}
+@media (prefers-color-scheme: dark) {
+  ${selector} {${DARK}}
+}
+`;

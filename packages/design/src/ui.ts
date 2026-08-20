@@ -49,6 +49,9 @@ pre {
   font-family: var(--mb-mono);
   font-size: 0.78rem;
   line-height: 1.65;
+  /* CDN の URL のような長い行を横スクロールにせず折り返す（インデントは保つ） */
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
 }
 pre code { background: none; padding: 0; }
 

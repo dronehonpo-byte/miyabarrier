@@ -336,7 +336,9 @@ describe('送信のフック', () => {
     const panel = form.querySelector('.mb-panel');
     expect(panel).not.toBeNull();
     expect(panel?.getAttribute('role')).toBe('alert');
-    expect(panel?.querySelectorAll('.mb-reasons li').length).toBeGreaterThan(0);
+    expect(panel?.querySelectorAll('.mb-panel__reasons li').length).toBeGreaterThan(0);
+    // 『なぜ止まったか』をグループ別のバーでも示す
+    expect(panel?.querySelectorAll('.mb-panel__groups .mb-meter').length).toBe(2);
   });
 
   it('ハニーポットが埋まっていれば内容に関係なくブロックする', () => {

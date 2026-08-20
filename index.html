@@ -8,145 +8,143 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Miyabarrier — 問い合わせフォームの営業・bot ブロック</title>
+    <title>Miyabarrier — 問い合わせフォームの営業・bot・AI自動送信をブロック</title>
     <meta
       name="description"
       content="問い合わせフォームに script 1 行貼るだけで、営業目的の送信・bot・AI エージェントによる自動送信をブロックする OSS ライブラリ。サーバー不要・API キー不要・外部通信ゼロ。"
     />
+    <link rel="stylesheet" href="./assets/miyabarrier-ui.css" />
     <style>
-      :root {
-        --bg: #f7f8f9;
-        --card: #fff;
-        --fg: #1f2933;
-        --muted: #6b7785;
-        --border: #e2e6ea;
-        --accent: #2f6f4f;
-        color-scheme: light dark;
+      .top-hero {
+        padding: 3.5rem 0 2.5rem;
+        text-align: center;
       }
-      @media (prefers-color-scheme: dark) {
-        :root {
-          --bg: #14181c;
-          --card: #1b2025;
-          --fg: #e7ebef;
-          --muted: #9aa5b1;
-          --border: #333c45;
-          --accent: #7fc7a4;
-        }
+      .top-hero h1 {
+        font-size: clamp(2rem, 5.5vw, 3rem);
+        margin: 0.5rem 0 0.7rem;
       }
-      * {
-        box-sizing: border-box;
-      }
-      body {
-        margin: 0;
-        padding: 3rem 1.25rem 5rem;
-        background: var(--bg);
-        color: var(--fg);
-        font-family:
-          system-ui,
-          -apple-system,
-          'Segoe UI',
-          'Hiragino Kaku Gothic ProN',
-          'Noto Sans JP',
-          sans-serif;
-        line-height: 1.8;
-      }
-      main {
-        max-width: 720px;
+      .top-hero__mark {
+        width: 68px;
+        height: 68px;
         margin: 0 auto;
       }
-      h1 {
-        margin: 0 0 0.3em;
-        font-size: clamp(1.8rem, 5vw, 2.4rem);
-        letter-spacing: -0.01em;
+      .top-hero__lede {
+        color: var(--mb-ink-500);
+        font-size: 1.02rem;
+        max-width: 58ch;
+        margin: 0 auto;
       }
-      .lead {
-        font-size: 1.05rem;
-        color: var(--muted);
-        margin: 0 0 2rem;
+      .top-snippet {
+        max-width: 640px;
+        margin: 2rem auto 0;
+        text-align: left;
       }
-      pre {
-        background: var(--card);
-        border: 1px solid var(--border);
-        border-radius: 10px;
-        padding: 1rem;
-        overflow-x: auto;
-        font-size: 0.8rem;
-        line-height: 1.6;
-        margin: 0 0 2rem;
-      }
-      code {
-        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-      }
-      .cards {
+      .top-cards {
         display: grid;
-        gap: 0.9rem;
-        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-        margin-bottom: 2.5rem;
+        gap: 1rem;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        margin-top: 2.5rem;
       }
-      a.card {
+      .top-card {
         display: block;
-        background: var(--card);
-        border: 1px solid var(--border);
-        border-radius: 12px;
-        padding: 1.1rem;
+        padding: 1.15rem 1.25rem;
+        border: 1px solid var(--mb-line);
+        border-radius: var(--mb-r-lg);
+        background: var(--mb-surface);
         text-decoration: none;
         color: inherit;
+        transition:
+          border-color 0.15s,
+          transform 0.15s;
       }
-      a.card:hover {
-        border-color: var(--accent);
+      .top-card:hover {
+        border-color: var(--mb-brand-400);
+        text-decoration: none;
+        transform: translateY(-1px);
       }
-      a.card b {
+      .top-card b {
         display: block;
-        color: var(--accent);
-        margin-bottom: 0.2em;
+        color: var(--mb-brand-700);
+        font-weight: 600;
+        margin-bottom: 0.2rem;
       }
-      a.card span {
+      .top-card span {
         font-size: 0.85rem;
-        color: var(--muted);
+        color: var(--mb-ink-500);
       }
-      ul {
-        padding-left: 1.3rem;
-        color: var(--muted);
-        font-size: 0.92rem;
+      .top-layers {
+        display: grid;
+        gap: 0.5rem;
+        margin-top: 1rem;
       }
-      footer {
-        margin-top: 2.5rem;
-        color: var(--muted);
-        font-size: 0.85rem;
+      .top-layer {
+        display: grid;
+        grid-template-columns: 7.5rem minmax(0, 1fr);
+        gap: 0.75rem;
+        align-items: baseline;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid var(--mb-line);
+        font-size: 0.88rem;
       }
-      a {
-        color: var(--accent);
+      .top-layer:last-child {
+        border-bottom: 0;
+      }
+      .top-layer b {
+        font-weight: 600;
+        font-size: 0.82rem;
+        color: var(--mb-brand-700);
+      }
+      .top-layer span {
+        color: var(--mb-ink-500);
       }
     </style>
   </head>
   <body>
-    <main>
-      <h1>🛡️ Miyabarrier</h1>
-      <p class="lead">
-        問い合わせフォームに <code>&lt;script&gt;</code> を 1 行貼るだけで、営業目的の送信・bot・AI
-        エージェントによる自動送信をブロックする OSS ライブラリ。サーバー不要・API
-        キー不要・外部通信ゼロ。
-      </p>
+    <header class="mb-topbar">
+      <span class="mb-topbar__logo">
+        <span data-mb-mark="compact"></span>
+        <span class="mb-topbar__name">Miyabarrier</span>
+      </span>
+      <span class="mb-topbar__sep" aria-hidden="true"></span>
+      <span class="mb-topbar__ctx">OSS · MIT License</span>
+      <span class="mb-topbar__actions">
+        <a class="mb-btn" href="./examples/demo.html">デモ</a>
+        <a class="mb-btn" href="https://github.com/dronehonpo-byte/miyabarrier">GitHub</a>
+      </span>
+    </header>
 
-      <pre><code>&lt;script
-  src="https://cdn.jsdelivr.net/gh/dronehonpo-byte/miyabarrier@v0.2.0/packages/widget/dist/miyabarrier.min.js"
+    <div class="mb-shell mb-shell--narrow">
+      <section class="top-hero">
+        <div class="top-hero__mark" data-mb-mark></div>
+        <span class="mb-eyebrow">Form defense for the AI agent era</span>
+        <h1>営業メールも、botも、<br />AIエージェントも止める。</h1>
+        <p class="top-hero__lede">
+          問い合わせフォームに <code>&lt;script&gt;</code> を 1 行貼るだけ。サーバー不要・API
+          キー不要・外部通信ゼロ。判定はすべて閲覧者のブラウザ内で完結します。
+        </p>
+        <div class="top-snippet">
+          <pre><code>&lt;script
+  src="https://cdn.jsdelivr.net/gh/dronehonpo-byte/miyabarrier@v0.3.0/packages/widget/dist/miyabarrier.min.js"
+  data-mode="block"
   defer&gt;&lt;/script&gt;</code></pre>
+        </div>
+      </section>
 
-      <div class="cards">
-        <a class="card" href="./examples/demo.html">
+      <div class="top-cards">
+        <a class="top-card" href="./examples/demo.html">
           <b>デモを試す →</b>
-          <span>営業文を貼ると警告が出ます。bot の動きも再現できます。</span>
+          <span>営業文を入れると止まります。保護前／保護後を並べて比較できます。</span>
         </a>
-        <a class="card" href="./packages/dashboard/index.html">
+        <a class="top-card" href="./packages/dashboard/index.html">
           <b>ダッシュボード →</b>
-          <span>判定ログの可視化としきい値シミュレーター。</span>
+          <span>検知ログの可視化と、しきい値シミュレーター。</span>
         </a>
-        <a class="card" href="https://github.com/dronehonpo-byte/miyabarrier#readme">
+        <a class="top-card" href="https://github.com/dronehonpo-byte/miyabarrier#readme">
           <b>ドキュメント →</b>
           <span>導入方法、しきい値の調整、NG ワードのカスタマイズ。</span>
         </a>
         <a
-          class="card"
+          class="top-card"
           href="https://github.com/dronehonpo-byte/miyabarrier/blob/main/docs/how-it-works.md"
         >
           <b>仕組み →</b>
@@ -154,17 +152,57 @@
         </a>
       </div>
 
-      <ul>
-        <li>判定はすべて閲覧者のブラウザ内で完結し、入力内容が外部に送られることはありません</li>
-        <li>ハニーポット・行動解析・自動化痕跡・「不自然な自然さ」・文面判定などの多層防御</li>
-        <li>NG ワードとスコア重みは JSON。コードを読まずに追記・調整できます</li>
-        <li>ランタイム依存 0、gzip 約 21KB の 1 ファイル</li>
-      </ul>
+      <section class="mb-section">
+        <div class="mb-card">
+          <div class="mb-card__head">
+            <div class="mb-vstack">
+              <span class="mb-eyebrow">Layers</span>
+              <h2>7 レイヤーの多層防御</h2>
+            </div>
+          </div>
+          <div class="top-layers">
+            <div class="top-layer">
+              <b>Layer 1</b><span>ハニーポット — 人間には見えない罠と、改ざん検知つきトークン</span>
+            </div>
+            <div class="top-layer">
+              <b>Layer 2</b><span>行動解析 — 経過時間、ポインタ／タッチ、入力速度、貼り付け</span>
+            </div>
+            <div class="top-layer">
+              <b>Layer 2.5</b><span>自動化の痕跡 — webdriver、headless の UA、環境の矛盾</span>
+            </div>
+            <div class="top-layer">
+              <b>Layer 2.6</b
+              ><span>「不自然な自然さ」 — 速度の変動係数、軌跡の直線度、打鍵間隔の量子化</span>
+            </div>
+            <div class="top-layer">
+              <b>Layer 3</b><span>チェックボックス認証 — スクリプトからのクリックを見分ける</span>
+            </div>
+            <div class="top-layer">
+              <b>Layer 4</b><span>営業文面判定 — 13 カテゴリ 243 語、正当な問い合わせ語は減点</span>
+            </div>
+            <div class="top-layer">
+              <b>Layer 6</b><span>AI 生成文判定 — 文長のばらつき、丁寧表現の密度、崩れの無さ</span>
+            </div>
+          </div>
+          <p class="mb-note" style="margin-top: 1rem">
+            「機械が送っているか」と「営業・勧誘の文面か」を独立して評価し、noisy-or
+            で合成します。人が手打ちした営業メールも、文面が中立な bot も、どちらも止まります。
+          </p>
+        </div>
+      </section>
 
-      <footer>
-        MIT License ·
+      <footer class="mb-foot">
+        <span class="mb-foot__brand">
+          <span data-mb-mark="compact"></span>
+          <span>Miyabarrier</span>
+        </span>
+        <span>by 株式会社Miyabee</span>
+        <span>MIT License</span>
         <a href="https://github.com/dronehonpo-byte/miyabarrier">GitHub</a>
       </footer>
-    </main>
+    </div>
+
+    <!-- ロゴは生成済みの軽量スクリプトで inline SVG として差し込む -->
+    <script src="./assets/logo.js" defer></script>
   </body>
 </html>

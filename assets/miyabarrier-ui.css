@@ -55,48 +55,46 @@
   /* 書体 */
   --mb-font: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', 'Hiragino Sans',
     'Hiragino Kaku Gothic ProN', 'Noto Sans JP', 'Yu Gothic UI', sans-serif;
-  --mb-mono: ui-monospace, 'SF Mono', 'JetBrains Mono', 'Cascadia Mono', Menlo, Consolas, monospace;
-}
-
+  --mb-mono: ui-monospace, 'SF Mono', 'JetBrains Mono', 'Cascadia Mono', Menlo, Consolas, monospace;}
 @media (prefers-color-scheme: dark) {
   :root {
-    --mb-brand-050: #101a2e;
-    --mb-brand-100: #16233d;
-    --mb-brand-200: #24365c;
-    --mb-brand-400: #6f9bf5;
-    --mb-brand-500: #5b8df0;
-    --mb-brand-600: #7aa6f7;
-    --mb-brand-700: #9dbdfa;
-    --mb-brand-800: #c3d6fc;
+  --mb-brand-050: #101a2e;
+  --mb-brand-100: #16233d;
+  --mb-brand-200: #24365c;
+  --mb-brand-400: #6f9bf5;
+  --mb-brand-500: #5b8df0;
+  --mb-brand-600: #7aa6f7;
+  --mb-brand-700: #9dbdfa;
+  --mb-brand-800: #c3d6fc;
 
-    --mb-canvas: #080b12;
-    --mb-surface: #0f141f;
-    --mb-surface-2: #131926;
-    --mb-surface-inset: #161d2c;
-    --mb-line: #212a3b;
-    --mb-line-strong: #2f3a4f;
+  --mb-canvas: #080b12;
+  --mb-surface: #0f141f;
+  --mb-surface-2: #131926;
+  --mb-surface-inset: #161d2c;
+  --mb-line: #212a3b;
+  --mb-line-strong: #2f3a4f;
 
-    --mb-ink-900: #eef1f6;
-    --mb-ink-700: #ccd3e0;
-    --mb-ink-500: #93a0b6;
-    --mb-ink-400: #7a8699;
-    --mb-ink-300: #5d6878;
+  --mb-ink-900: #eef1f6;
+  --mb-ink-700: #ccd3e0;
+  --mb-ink-500: #93a0b6;
+  --mb-ink-400: #7a8699;
+  --mb-ink-300: #5d6878;
 
-    --mb-block: #f18a82;
-    --mb-block-soft: #24161a;
-    --mb-block-line: #4a2a28;
-    --mb-review: #e0b45c;
-    --mb-review-soft: #231c10;
-    --mb-review-line: #453a1e;
-    --mb-pass: #62c69f;
-    --mb-pass-soft: #10201b;
-    --mb-pass-line: #23453a;
+  --mb-block: #f18a82;
+  --mb-block-soft: #24161a;
+  --mb-block-line: #4a2a28;
+  --mb-review: #e0b45c;
+  --mb-review-soft: #231c10;
+  --mb-review-line: #453a1e;
+  --mb-pass: #62c69f;
+  --mb-pass-soft: #10201b;
+  --mb-pass-line: #23453a;
 
-    --mb-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
-    --mb-shadow-md: 0 4px 16px -4px rgba(0, 0, 0, 0.5), 0 1px 2px rgba(0, 0, 0, 0.4);
-    --mb-shadow-lg: 0 18px 48px -12px rgba(0, 0, 0, 0.7), 0 2px 6px rgba(0, 0, 0, 0.5);
-    --mb-ring: 0 0 0 3px rgba(122, 166, 247, 0.22);
-  }
+  --mb-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --mb-shadow-md: 0 4px 16px -4px rgba(0, 0, 0, 0.5), 0 1px 2px rgba(0, 0, 0, 0.4);
+  --mb-shadow-lg: 0 18px 48px -12px rgba(0, 0, 0, 0.7), 0 2px 6px rgba(0, 0, 0, 0.5);
+  --mb-ring: 0 0 0 3px rgba(122, 166, 247, 0.22);
+}
 }
 
 
@@ -137,6 +135,9 @@ pre {
   font-family: var(--mb-mono);
   font-size: 0.78rem;
   line-height: 1.65;
+  /* CDN の URL のような長い行を横スクロールにせず折り返す（インデントは保つ） */
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
 }
 pre code { background: none; padding: 0; }
 

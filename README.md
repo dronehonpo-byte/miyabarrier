@@ -6,11 +6,11 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](./LICENSE)
 ![dependencies: none](https://img.shields.io/badge/dependencies-none-brightgreen)
-![gzip](https://img.shields.io/badge/gzip-about%2021KB-blue)
+![gzip](https://img.shields.io/badge/gzip-about%2025KB-blue)
 
 ```html
 <script
-  src="https://cdn.jsdelivr.net/gh/dronehonpo-byte/miyabarrier@v0.2.0/packages/widget/dist/miyabarrier.min.js"
+  src="https://cdn.jsdelivr.net/gh/dronehonpo-byte/miyabarrier@v0.3.0/packages/widget/dist/miyabarrier.min.js"
   defer
 ></script>
 ```
@@ -39,7 +39,7 @@ Miyabarrier は 3 つすべてを対象にします。「機械かどうか」�
 - **AI 自動化に対応** — 等速のマウス移動や等間隔の打鍵といった、生成された操作の「揺らぎの不自然さ」を統計量で検出します。
 - **誤検知への逃げ道** — 判定理由を必ず画面に出し、`warn` モードでは利用者が送信を続行できます。
 - **コミュニティで育てられる** — NG ワードとスコア重みは [`patterns/`](./patterns) の JSON。コードを読まずに追記・調整できます。
-- **依存パッケージなし** — ランタイム依存 0。gzip 約 21KB の 1 ファイル。
+- **依存パッケージなし** — ランタイム依存 0。gzip 約 25KB の 1 ファイル。
 
 ## 仕組み
 
@@ -82,7 +82,7 @@ Miyabarrier は 3 つすべてを対象にします。「機械かどうか」�
 
 ```html
 <script
-  src="https://cdn.jsdelivr.net/gh/dronehonpo-byte/miyabarrier@v0.2.0/packages/widget/dist/miyabarrier.min.js"
+  src="https://cdn.jsdelivr.net/gh/dronehonpo-byte/miyabarrier@v0.3.0/packages/widget/dist/miyabarrier.min.js"
   data-mode="block"
   data-badge="inline"
   defer
@@ -119,7 +119,7 @@ import {
   protect,
   protectAll,
   analyzeText,
-} from 'https://cdn.jsdelivr.net/gh/dronehonpo-byte/miyabarrier@v0.2.0/packages/widget/dist/miyabarrier.esm.js';
+} from 'https://cdn.jsdelivr.net/gh/dronehonpo-byte/miyabarrier@v0.3.0/packages/widget/dist/miyabarrier.esm.js';
 
 // 個別に保護する
 protect('#contact-form', {

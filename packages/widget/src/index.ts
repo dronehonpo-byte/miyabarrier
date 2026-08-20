@@ -25,6 +25,7 @@ import {
 import { collectFormValues, findForms, injectHoneypot, type InjectedHoneypot } from './inject';
 import { FormTelemetry } from './telemetry';
 import { appendLog, clearLog as clearStoredLog, readLog, type LogEntry } from './log';
+import { markSvg } from '@miyabarrier/design/logo';
 import { createBadge, createCheckbox, createPanel, ensureStyles } from './ui';
 
 declare const __MIYABARRIER_VERSION__: string;
@@ -433,6 +434,7 @@ export const api = {
   destroyAll,
   defaultOptions,
   defaultWeights,
+  markSvg,
   defaultNgWords,
   instances: protectedForms,
 };
