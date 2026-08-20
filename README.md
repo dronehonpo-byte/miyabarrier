@@ -270,8 +270,11 @@ npm run typecheck    # 型チェック
 npm run lint         # ESLint
 npm run build        # patterns の生成 + core のビルド + widget のバンドル
 npm run demo         # http://localhost:4173 でデモを起動
-npm run verify       # 上記すべて（CI と同じ）
+npm run verify       # 上記すべて（CI と同じ内容）
 ```
+
+CI のワークフロー定義は [.github/ci-templates/](./.github/ci-templates) にあります（作成時のトークンに
+`workflow` スコープが無く push できなかったため。有効化手順は同ディレクトリの README を参照）。
 
 構成:
 

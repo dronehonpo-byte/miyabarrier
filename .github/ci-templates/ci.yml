@@ -1,0 +1,26 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm run format:check
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build
+      # patterns/*.json を編集して patterns.data.ts の再生成を忘れていないか、
+      # また dist が最新のソースから作られているかを確認する。
+      - name: 生成物が最新であることを確認
+        run: git diff --exit-code -- packages/core/src/patterns.data.ts
