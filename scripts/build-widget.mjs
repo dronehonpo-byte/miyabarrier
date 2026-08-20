@@ -25,7 +25,7 @@ execFileSync(process.execPath, [join(root, 'scripts', 'build-patterns.mjs')], {
   stdio: 'inherit',
 });
 
-const banner = `/*! Miyabarrier v${version} | MIT License | https://github.com/miyabarrier/miyabarrier */`;
+const banner = `/*! Miyabarrier v${version} | MIT License | https://github.com/dronehonpo-byte/miyabarrier */`;
 
 const shared = {
   entryPoints: [join(widget, 'src', 'index.ts')],

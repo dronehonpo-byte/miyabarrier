@@ -10,14 +10,14 @@
 
 ```html
 <script
-  src="https://cdn.jsdelivr.net/gh/miyabarrier/miyabarrier@v0.2.0/packages/widget/dist/miyabarrier.min.js"
+  src="https://cdn.jsdelivr.net/gh/dronehonpo-byte/miyabarrier@v0.2.0/packages/widget/dist/miyabarrier.min.js"
   defer
 ></script>
 ```
 
 これだけで、ページ内の問い合わせフォームが自動的に保護されます。設置後の設定作業はありません。
 
-👉 **[デモページで試す](https://miyabarrier.github.io/miyabarrier/examples/demo.html)**（営業文を貼ると警告が出ます。bot の動きも再現できます）
+👉 **[デモページで試す](https://dronehonpo-byte.github.io/miyabarrier/examples/demo.html)**（営業文を貼ると警告が出ます。bot の動きも再現できます）
 
 ---
 
@@ -82,7 +82,7 @@ Miyabarrier は 3 つすべてを対象にします。「機械かどうか」�
 
 ```html
 <script
-  src="https://cdn.jsdelivr.net/gh/miyabarrier/miyabarrier@v0.2.0/packages/widget/dist/miyabarrier.min.js"
+  src="https://cdn.jsdelivr.net/gh/dronehonpo-byte/miyabarrier@v0.2.0/packages/widget/dist/miyabarrier.min.js"
   data-mode="block"
   data-badge="inline"
   defer
@@ -109,14 +109,17 @@ Miyabarrier は 3 つすべてを対象にします。「機械かどうか」�
 
 保護したくないフォームには `data-miyabarrier="off"` を付けてください。パスワード欄を含むフォーム（ログイン・登録）と、自由記述欄のないフォーム（検索など）は自動検出の対象外です。
 
-### 2. npm（バンドラを使う場合）
+### 2. バンドラ・フレームワークから使う
 
-```bash
-npm install @miyabarrier/widget
-```
+npm にはまだ公開していません（→ [ロードマップ](#ロードマップ)）。当面は CDN の ESM ビルドを
+そのまま import できます。
 
 ```js
-import { protect, protectAll, analyzeText } from '@miyabarrier/widget';
+import {
+  protect,
+  protectAll,
+  analyzeText,
+} from 'https://cdn.jsdelivr.net/gh/dronehonpo-byte/miyabarrier@v0.2.0/packages/widget/dist/miyabarrier.esm.js';
 
 // 個別に保護する
 protect('#contact-form', {
@@ -128,7 +131,9 @@ protect('#contact-form', {
 });
 ```
 
-判定ロジックだけが必要なら `@miyabarrier/core` を直接使えます。DOM もネットワークも触らない純関数なので、サーバー側の検証にも流用できます。
+判定ロジックだけが必要なら core をリポジトリから直接使えます。DOM もネットワークも触らない純関数なので、
+サーバー側の検証にも流用できます（`git clone` して `packages/core` を参照するか、`npm run build` の
+出力 `packages/core/lib` を取り込んでください）。
 
 ```js
 import { analyze, scoreNgWords, defaultNgWords } from '@miyabarrier/core';
@@ -284,6 +289,7 @@ examples/demo.html  デモページ
 ## ロードマップ
 
 - [x] `packages/dashboard` — localStorage のログを可視化する静的ページ（v0.2.0 で追加）
+- [ ] npm への公開（`@miyabarrier/core` / `@miyabarrier/widget`）
 - [ ] NG ワードの多言語対応
 - [ ] サーバーサイド検証のサンプル（`@miyabarrier/core` を Node で使う）
 - [ ] WordPress / Contact Form 7 向けの導入手順

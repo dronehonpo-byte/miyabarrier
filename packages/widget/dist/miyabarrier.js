@@ -1,4 +1,4 @@
-/*! Miyabarrier v0.2.0 | MIT License | https://github.com/miyabarrier/miyabarrier */
+/*! Miyabarrier v0.2.0 | MIT License | https://github.com/dronehonpo-byte/miyabarrier */
 "use strict";
 (() => {
   // ../core/src/util.ts
@@ -2071,7 +2071,7 @@
 
   // src/ui.ts
   var STYLE_ID = "miyabarrier-style";
-  var REPO_URL = "https://github.com/miyabarrier/miyabarrier";
+  var REPO_URL = "https://github.com/dronehonpo-byte/miyabarrier";
   var CSS = `
 .mb-root{--mb-fg:#1f2933;--mb-muted:#6b7785;--mb-bg:#fff;--mb-border:#dfe3e8;--mb-accent:#2f6f4f;
 --mb-warn-bg:#fff8e6;--mb-warn-border:#e8c15a;--mb-warn-fg:#7a5300;

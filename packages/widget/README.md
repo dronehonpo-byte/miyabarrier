@@ -1,27 +1,33 @@
 # @miyabarrier/widget
 
-[Miyabarrier](https://github.com/miyabarrier/miyabarrier) のブラウザ側。スクリプトタグ 1 行で問い合わせフォームを保護します。
+[Miyabarrier](https://github.com/dronehonpo-byte/miyabarrier) のブラウザ側。スクリプトタグ 1 行で問い合わせフォームを保護します。
 
 ## スクリプトタグ
 
 ```html
 <script
-  src="https://cdn.jsdelivr.net/gh/miyabarrier/miyabarrier@v0.2.0/packages/widget/dist/miyabarrier.min.js"
+  src="https://cdn.jsdelivr.net/gh/dronehonpo-byte/miyabarrier@v0.2.0/packages/widget/dist/miyabarrier.min.js"
   data-mode="block"
   defer
 ></script>
 ```
 
-読み込むだけで、ページ内の問い合わせフォームを自動検出して保護します。`data-*` 属性の一覧は [README](https://github.com/miyabarrier/miyabarrier#1-スクリプトタグ推奨) を参照してください。
+読み込むだけで、ページ内の問い合わせフォームを自動検出して保護します。`data-*` 属性の一覧は [README](https://github.com/dronehonpo-byte/miyabarrier#1-スクリプトタグ推奨) を参照してください。
 
-## npm
+## バンドラから使う
 
-```bash
-npm install @miyabarrier/widget
+npm には未公開です。当面は CDN の ESM ビルドをそのまま import してください。
+
+```js
+import { protect } from 'https://cdn.jsdelivr.net/gh/dronehonpo-byte/miyabarrier@v0.2.0/packages/widget/dist/miyabarrier.esm.js';
 ```
 
 ```js
-import { protect, analyzeText, getLog } from '@miyabarrier/widget';
+import {
+  protect,
+  analyzeText,
+  getLog,
+} from 'https://cdn.jsdelivr.net/gh/dronehonpo-byte/miyabarrier@v0.2.0/packages/widget/dist/miyabarrier.esm.js';
 
 const guard = protect('#contact-form', {
   mode: 'warn',

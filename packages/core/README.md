@@ -1,10 +1,9 @@
 # @miyabarrier/core
 
-[Miyabarrier](https://github.com/miyabarrier/miyabarrier) の判定エンジン。DOM もネットワークも触らない純関数の集まりなので、ブラウザでもサーバー（Node）でも同じ判定ができます。
+[Miyabarrier](https://github.com/dronehonpo-byte/miyabarrier) の判定エンジン。DOM もネットワークも触らない純関数の集まりなので、ブラウザでもサーバー（Node）でも同じ判定ができます。
 
-```bash
-npm install @miyabarrier/core
-```
+> npm には未公開です。いまは `git clone` して `packages/core` を参照するか、
+> `npm run build` の出力（`packages/core/lib`）を取り込んでください。
 
 ```js
 import { analyze, scoreNgWords, defaultNgWords } from '@miyabarrier/core';
@@ -43,6 +42,6 @@ const result = analyze({
 | `defaultWeights` / `defaultNgWords`                                                                                                             | `patterns/*.json` の内容               |
 | `decideVerdict(score, thresholds, hardBlocked?)`                                                                                                | しきい値の適用のみ                     |
 
-判定の考え方は [docs/how-it-works.md](https://github.com/miyabarrier/miyabarrier/blob/main/docs/how-it-works.md) を参照してください。
+判定の考え方は [docs/how-it-works.md](https://github.com/dronehonpo-byte/miyabarrier/blob/main/docs/how-it-works.md) を参照してください。
 
 MIT License

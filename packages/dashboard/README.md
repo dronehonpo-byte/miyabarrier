@@ -1,6 +1,6 @@
 # @miyabarrier/dashboard
 
-[Miyabarrier](https://github.com/miyabarrier/miyabarrier) の判定ログを可視化する静的ページ。サーバー不要・外部通信なし。
+[Miyabarrier](https://github.com/dronehonpo-byte/miyabarrier) の判定ログを可視化する静的ページ。サーバー不要・外部通信なし。
 
 ## 使い方
 

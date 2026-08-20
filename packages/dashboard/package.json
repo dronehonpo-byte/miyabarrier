@@ -7,5 +7,23 @@
   "type": "module",
   "scripts": {
     "build": "node ../../scripts/build-dashboard.mjs"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dronehonpo-byte/miyabarrier.git",
+    "directory": "packages/dashboard"
+  },
+  "homepage": "https://github.com/dronehonpo-byte/miyabarrier#readme",
+  "bugs": {
+    "url": "https://github.com/dronehonpo-byte/miyabarrier/issues"
+  },
+  "keywords": [
+    "spam",
+    "anti-spam",
+    "contact-form",
+    "bot-detection",
+    "honeypot",
+    "form-protection",
+    "captcha-alternative"
+  ]
 }

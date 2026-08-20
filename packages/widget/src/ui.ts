@@ -11,7 +11,7 @@
 import type { AnalysisResult } from '@miyabarrier/core';
 
 const STYLE_ID = 'miyabarrier-style';
-export const REPO_URL = 'https://github.com/miyabarrier/miyabarrier';
+export const REPO_URL = 'https://github.com/dronehonpo-byte/miyabarrier';
 
 const CSS = `
 .mb-root{--mb-fg:#1f2933;--mb-muted:#6b7785;--mb-bg:#fff;--mb-border:#dfe3e8;--mb-accent:#2f6f4f;
