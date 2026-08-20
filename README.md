@@ -17,7 +17,10 @@
 
 これだけで、ページ内の問い合わせフォームが自動的に保護されます。設置後の設定作業はありません。
 
-👉 **[デモページで試す](https://dronehonpo-byte.github.io/miyabarrier/examples/demo.html)**（営業文を貼ると警告が出ます。bot の動きも再現できます）
+**公開デモ**
+
+- 👉 **[デモで試す](https://dronehonpo-byte.github.io/miyabarrier/examples/demo.html)** — 保護なし／保護ありを並べて比較できます。bot の動きも再現できます
+- 👉 **[実サイトでの見え方](https://dronehonpo-byte.github.io/miyabarrier/examples/embedded.html)** — よくある会社サイトに 1 行だけ入れた状態。警告表示・送信できたときの見た目
 
 ---
 
@@ -321,7 +324,7 @@ npm test             # ユニットテスト（vitest, 143 件）
 npm run typecheck    # 型チェック
 npm run lint         # ESLint
 npm run build        # patterns の生成 + core のビルド + widget のバンドル
-npm run demo         # http://localhost:4173 でデモを起動
+npm run demo         # ローカルでデモを起動（http://localhost:4173）
 npm run verify       # 上記すべて（CI と同じ内容）
 ```
 

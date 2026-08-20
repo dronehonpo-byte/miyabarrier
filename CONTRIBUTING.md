@@ -50,7 +50,7 @@ Miyabarrier は「営業文面のパターンをみんなで育てる」こと�
 npm install
 npm test          # ユニットテスト
 npm run verify    # format:check + lint + typecheck + test + build（CI と同じ）
-npm run demo      # http://localhost:4173 でデモを起動
+npm run demo      # ローカルでデモを起動（http://localhost:4173）
 ```
 
 `patterns/*.json` を編集したら `npm run gen` を実行してください（`packages/core/src/patterns.data.ts` に埋め込まれます）。忘れてもテストが検出します。生成物は直接編集しないでください。
