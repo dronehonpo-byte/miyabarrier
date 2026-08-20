@@ -1,0 +1,635 @@
+/**
+ * このファイルは scripts/build-patterns.mjs による自動生成物です。直接編集しないでください。
+ * 編集元: patterns/ng-words.json, patterns/weights.json
+ * 再生成: npm run gen
+ */
+import type { NgWordList, WeightConfig } from './types';
+
+export const defaultNgWords: NgWordList = {
+  "$schema": "./ng-words.schema.json",
+  "version": 1,
+  "updated": "2026-08-19",
+  "locale": [
+    "ja",
+    "en"
+  ],
+  "notes": [
+    "categories[].score は『1語ヒットするごとに加算される点数』。マイナス値を書くと減点(=正当な問い合わせらしさ)として働く。",
+    "categories[].cap は、そのカテゴリ単体で加算できる点数の上限(マイナスカテゴリでは下限)。1カテゴリに語を大量に並べても暴走しないための安全弁。",
+    "terms は部分一致。比較前に小文字化・全角英数の半角化・空白の正規化を行うので、リストは小文字・半角で書く。",
+    "patterns は JavaScript 正規表現のソース文字列(フラグは gi 固定)。1つのパターンがマッチしたら1ヒットとして score を加算する。",
+    "allowlist.terms に含まれる語が本文にあると、その語に内包される NG ワードのヒットを1件ずつ打ち消す(誤検知の抑制)。",
+    "追記の作法: 既存カテゴリへは score/cap を変えずに terms を1語ずつ追加する。新カテゴリは id を kebab-case、score は絶対値 1〜4 に収めるのが目安。"
+  ],
+  "categories": [
+    {
+      "id": "cold-open",
+      "label": "面識のない相手への定型的な前置き",
+      "score": 3,
+      "cap": 9,
+      "terms": [
+        "突然のご連絡",
+        "突然のメール",
+        "初めてご連絡",
+        "はじめてご連絡",
+        "初めてメール",
+        "ご担当者様",
+        "ご担当者さま",
+        "担当者様",
+        "web担当者様",
+        "採用ご担当者様",
+        "貴社",
+        "御社",
+        "ホームページを拝見",
+        "サイトを拝見",
+        "hpを拝見",
+        "問い合わせフォームより失礼",
+        "フォームより失礼",
+        "お問い合わせフォームから失礼"
+      ],
+      "patterns": [
+        "(株式会社|合同会社|有限会社)[^\\s、。,.]{1,14}の[^\\s、。,.]{1,12}と申します",
+        "^[\\s\\S]{0,60}(と申します|と言います)[\\s\\S]{0,120}(ご提案|ご案内|ご紹介)"
+      ]
+    },
+    {
+      "id": "sales-offer",
+      "label": "提案・紹介の申し出",
+      "score": 3,
+      "cap": 9,
+      "terms": [
+        "ご提案",
+        "提案させて",
+        "ご案内させて",
+        "ご紹介させて",
+        "ご紹介したく",
+        "ご案内したく",
+        "弊社サービス",
+        "当社サービス",
+        "弊社では",
+        "当社では",
+        "弊社商品",
+        "お役立ていただける",
+        "お力添えできる",
+        "お手伝いできる",
+        "導入のご検討",
+        "営業支援",
+        "販路拡大",
+        "代理店募集",
+        "業務提携",
+        "アライアンス"
+      ]
+    },
+    {
+      "id": "benefit-claim",
+      "label": "効果・成果の売り込み",
+      "score": 2,
+      "cap": 8,
+      "terms": [
+        "課題解決",
+        "課題を解決",
+        "お悩みを解決",
+        "売上向上",
+        "売上アップ",
+        "売上が伸び",
+        "コスト削減",
+        "コストカット",
+        "業務効率化",
+        "生産性向上",
+        "工数削減",
+        "集客力",
+        "集客につながる",
+        "成約率",
+        "問い合わせ数を増",
+        "リード獲得",
+        "新規開拓",
+        "劇的に改善",
+        "大幅に改善",
+        "劇的に向上",
+        "利益率が改善"
+      ]
+    },
+    {
+      "id": "proof-authority",
+      "label": "実績・権威づけ",
+      "score": 2,
+      "cap": 6,
+      "terms": [
+        "導入実績",
+        "導入企業",
+        "実績多数",
+        "導入社数",
+        "導入事例",
+        "事例集",
+        "上場企業",
+        "大手企業様",
+        "大手企業を中心に",
+        "業界no.1",
+        "シェアno.1",
+        "顧客満足度no.1",
+        "特許取得",
+        "テレビで紹介",
+        "メディア掲載"
+      ]
+    },
+    {
+      "id": "cta-meeting",
+      "label": "商談・面談への誘導",
+      "score": 3,
+      "cap": 9,
+      "terms": [
+        "無料相談",
+        "無料でご相談",
+        "無料トライアル",
+        "無料デモ",
+        "無料診断",
+        "無料分析",
+        "無料でお試し",
+        "資料をお送り",
+        "資料送付",
+        "お打ち合わせ",
+        "打ち合わせのお時間",
+        "オンライン面談",
+        "web会議",
+        "zoomにて",
+        "お電話にて",
+        "30分ほど",
+        "30分だけ",
+        "15分ほど",
+        "日程調整",
+        "ご都合のよい",
+        "ご都合の良い",
+        "ご都合のつく",
+        "候補日",
+        "面談のご依頼",
+        "ご挨拶の機会"
+      ]
+    },
+    {
+      "id": "price-bait",
+      "label": "価格・期間限定の煽り",
+      "score": 2,
+      "cap": 6,
+      "terms": [
+        "初期費用0円",
+        "初期費用無料",
+        "初期費用ゼロ",
+        "成果報酬",
+        "完全成果報酬",
+        "業界最安",
+        "特別価格",
+        "特別条件",
+        "キャンペーン中",
+        "今だけ",
+        "期間限定",
+        "限定5社",
+        "限定10社",
+        "枠が埋まり",
+        "残りわずか"
+      ]
+    },
+    {
+      "id": "web-marketing",
+      "label": "Web制作・広告・SEO系の売り込み",
+      "score": 3,
+      "cap": 9,
+      "terms": [
+        "seo対策",
+        "seo施策",
+        "検索順位",
+        "上位表示",
+        "被リンク",
+        "外部リンク対策",
+        "meo対策",
+        "リスティング広告",
+        "web広告運用",
+        "広告運用代行",
+        "ホームページ制作",
+        "hp制作",
+        "サイトリニューアル",
+        "lp制作",
+        "ランディングページ制作",
+        "instagram運用代行",
+        "sns運用代行",
+        "youtube運用",
+        "アクセス解析",
+        "maツール",
+        "crm導入",
+        "生成aiの導入支援",
+        "dx推進支援"
+      ]
+    },
+    {
+      "id": "recruit-hr",
+      "label": "人材・採用系の売り込み",
+      "score": 3,
+      "cap": 6,
+      "terms": [
+        "人材紹介",
+        "人材派遣",
+        "採用支援",
+        "採用代行",
+        "求人広告のご案内",
+        "エンジニアのご紹介",
+        "即戦力人材",
+        "オフショア開発",
+        "ニアショア",
+        "常駐可能",
+        "業務委託でのご協力",
+        "フリーランス人材"
+      ]
+    },
+    {
+      "id": "finance-legal",
+      "label": "資金・節税・コスト削減系の売り込み",
+      "score": 3,
+      "cap": 6,
+      "terms": [
+        "資金調達",
+        "ファクタリング",
+        "つなぎ融資",
+        "助成金",
+        "補助金申請",
+        "補助金の採択",
+        "節税対策",
+        "保険の見直し",
+        "電気代の削減",
+        "通信費の削減",
+        "オフィス移転のご相談"
+      ]
+    },
+    {
+      "id": "mass-mail-boilerplate",
+      "label": "一斉送信の痕跡（配信停止文・免責文）",
+      "score": 4,
+      "cap": 8,
+      "terms": [
+        "配信停止",
+        "配信の停止",
+        "心当たりのない場合",
+        "心当たりがない場合",
+        "お心当たりのない",
+        "ご不要でしたら",
+        "不要な場合はご返信",
+        "今後のご案内を希望されない",
+        "重複してお送り",
+        "本メールは営業目的",
+        "掲載情報をもとに",
+        "公開情報をもとに",
+        "ホームページに掲載されている情報",
+        "unsubscribe",
+        "opt out",
+        "opt-out"
+      ]
+    },
+    {
+      "id": "signature-block",
+      "label": "署名ブロック（会社情報の列挙）",
+      "score": 2,
+      "cap": 6,
+      "terms": [
+        "tel:",
+        "fax:",
+        "e-mail:",
+        "所在地:",
+        "事業内容:",
+        "営業部",
+        "マーケティング部",
+        "事業開発部"
+      ],
+      "patterns": [
+        "〒\\s*\\d{3}[-ー－]?\\d{4}",
+        "0\\d{1,3}[-(]\\d{2,4}[-)]\\d{3,4}"
+      ]
+    },
+    {
+      "id": "english-outreach",
+      "label": "英語のコールドアプローチ定型句",
+      "score": 3,
+      "cap": 12,
+      "terms": [
+        "dear sir",
+        "dear madam",
+        "to whom it may concern",
+        "i hope this email finds you well",
+        "i hope you are doing well",
+        "hope this message finds you",
+        "we specialize in",
+        "we specialise in",
+        "we are a leading",
+        "increase your sales",
+        "boost your traffic",
+        "grow your business",
+        "first page of google",
+        "rank higher on google",
+        "backlinks",
+        "guest post",
+        "link building",
+        "seo services",
+        "web design services",
+        "outsourcing partner",
+        "dedicated developers",
+        "let me know if you are interested",
+        "book a call",
+        "schedule a quick call",
+        "15-minute call",
+        "no obligation",
+        "free quote",
+        "free audit"
+      ]
+    },
+    {
+      "id": "legit-inquiry",
+      "label": "正当な問い合わせらしさ（減点）",
+      "score": -3,
+      "cap": -12,
+      "terms": [
+        "見積",
+        "納期",
+        "在庫",
+        "購入したい",
+        "購入を検討",
+        "注文",
+        "発注",
+        "予約",
+        "キャンセル",
+        "返品",
+        "交換",
+        "修理",
+        "故障",
+        "不具合",
+        "エラーが出",
+        "動作しない",
+        "ログインできない",
+        "パスワードを忘れ",
+        "領収書",
+        "請求書の",
+        "支払い方法",
+        "料金について知りたい",
+        "使い方がわからない",
+        "使い方を教えて",
+        "取材のご依頼",
+        "求人に応募",
+        "応募したい",
+        "採用に応募",
+        "体験してみたい",
+        "見学",
+        "空き状況"
+      ]
+    }
+  ],
+  "allowlist": {
+    "notes": "ここに書かれた語が本文にあると、その語に内包される NG ワードのヒットを1件打ち消す。『貴社』『無料相談』などで誤検知しやすいケースに使う。",
+    "terms": [
+      "貴社製品を購入",
+      "御社の製品を購入",
+      "貴社の求人",
+      "御社の求人",
+      "無料相談の予約",
+      "資料送付いただいた件",
+      "先日ご提案いただいた"
+    ]
+  }
+};
+
+export const defaultWeights: WeightConfig = {
+  "$schema": "./weights.schema.json",
+  "version": 1,
+  "updated": "2026-08-19",
+  "notes": [
+    "各レイヤーは『シグナル(code)』を出力し、scoring がここに書かれた points を引いて加算する。",
+    "シグナルは 0〜1 の intensity を持つことができ、加点は points * intensity になる(既定は 1)。",
+    "レイヤーのスコア = clamp(シグナル加点の合計 / saturation, 0, 1)。saturation はそのレイヤーが満点になる点数。",
+    "レイヤーは group に属する。group スコア = Σ(レイヤースコア * weight) / Σ(判定できたレイヤーの weight)。テレメトリが取れず判定不能なレイヤーは母数から外れるので、モバイルでポインタ軌跡が取れないだけでスコアが動くことはない。",
+    "weight はグループ内での相対的な重み。グループごとに合計 1.0 になるように書く。",
+    "layers[].evidenceOnly を true にすると、そのレイヤーは加点があるときだけ母数に入る。ハニーポットは『引っかかれば決定的な証拠、無反応なら何の情報でもない』ため true にしている。",
+    "総合スコア = combine で決める。noisy-or では 1 - Π(1 - groupスコア * groupの weight)。『bot らしさ』と『営業らしさ』は独立した疑いなので、どちらか一方だけでもしきい値に到達できるようにするための既定値。weighted-mean にすると groups[].weight による加重平均になる。",
+    "hardBlock に挙げた code が1つでも立つと、他のスコアに関係なく block になる。",
+    "points に未登録の code は 0 点として扱われ、result.warnings に列挙される(タイポ検知用)。",
+    "チューニングの目安: まず thresholds を動かし、次に layers[].weight、最後に個別の points を触る。"
+  ],
+  "thresholds": {
+    "review": 0.4,
+    "block": 0.62
+  },
+  "hardBlock": [
+    "honeypot.filled",
+    "honeypot.decoyChecked"
+  ],
+  "layers": {
+    "honeypot": {
+      "label": "Layer 1 ハニーポット",
+      "group": "automation",
+      "weight": 0.12,
+      "evidenceOnly": true,
+      "saturation": 4,
+      "points": {
+        "honeypot.filled": 4,
+        "honeypot.decoyChecked": 4,
+        "honeypot.fieldMissing": 2,
+        "honeypot.tokenMissing": 2,
+        "honeypot.tokenTampered": 3
+      }
+    },
+    "behavior": {
+      "label": "Layer 2 行動解析",
+      "group": "automation",
+      "weight": 0.28,
+      "saturation": 6,
+      "points": {
+        "behavior.instantSubmit": 4,
+        "behavior.fastSubmit": 2.5,
+        "behavior.noMouseActivity": 2,
+        "behavior.noFocusEvents": 2,
+        "behavior.impossibleTypingSpeed": 3,
+        "behavior.noKeystrokes": 2.5,
+        "behavior.pastedBody": 1.5,
+        "behavior.staleForm": 1
+      },
+      "tuning": {
+        "instantSubmitMs": 1500,
+        "fastSubmitMs": 5000,
+        "staleFormMs": 7200000,
+        "maxPlausibleCharsPerMinute": 1200,
+        "minMouseSamples": 3,
+        "pastedCharsThreshold": 120
+      }
+    },
+    "environment": {
+      "label": "Layer 2.5 自動化ブラウザの痕跡",
+      "group": "automation",
+      "weight": 0.22,
+      "saturation": 6,
+      "points": {
+        "env.webdriver": 4,
+        "env.headlessUserAgent": 4,
+        "env.automationUserAgent": 3,
+        "env.botUserAgent": 3,
+        "env.noPlugins": 1.5,
+        "env.chromeObjectMissing": 2,
+        "env.noLanguages": 2,
+        "env.viewportEqualsScreen": 1.5,
+        "env.zeroOuterWindow": 1.5,
+        "env.touchInconsistency": 1.5,
+        "env.suspiciousHardwareConcurrency": 1,
+        "env.permissionsInconsistency": 1.5
+      },
+      "tuning": {
+        "headlessMarkers": [
+          "headlesschrome",
+          "headless"
+        ],
+        "automationMarkers": [
+          "puppeteer",
+          "playwright",
+          "selenium",
+          "phantomjs",
+          "webdriver"
+        ],
+        "botUserAgentMarkers": [
+          "bot",
+          "crawler",
+          "spider",
+          "python-requests",
+          "curl/",
+          "wget/",
+          "axios/",
+          "okhttp",
+          "scrapy",
+          "http-client"
+        ]
+      }
+    },
+    "mimicry": {
+      "label": "Layer 2.6 『不自然な自然さ』検知",
+      "group": "automation",
+      "weight": 0.26,
+      "saturation": 5,
+      "points": {
+        "mimicry.uniformMouseSpeed": 2,
+        "mimicry.straightMousePath": 2,
+        "mimicry.quantizedMouseSteps": 2,
+        "mimicry.uniformKeyIntervals": 2.5,
+        "mimicry.quantizedKeyIntervals": 2,
+        "mimicry.uniformFieldTransitions": 1.5,
+        "mimicry.noJitter": 1.5
+      },
+      "tuning": {
+        "minMouseSamples": 12,
+        "minKeyIntervals": 8,
+        "minFieldTransitions": 3,
+        "mouseSpeedCvFloor": 0.18,
+        "keyIntervalCvFloor": 0.22,
+        "fieldTransitionCvFloor": 0.12,
+        "straightnessCeiling": 0.985,
+        "quantizedRatioCeiling": 0.6,
+        "jitterFloorPx": 0.75
+      }
+    },
+    "checkbox": {
+      "label": "Layer 3 チェックボックス認証",
+      "group": "automation",
+      "weight": 0.12,
+      "saturation": 4,
+      "points": {
+        "checkbox.unchecked": 3,
+        "checkbox.programmaticCheck": 4,
+        "checkbox.instantCheck": 2,
+        "checkbox.noPointerTrail": 1.5,
+        "checkbox.excessiveToggles": 1
+      },
+      "tuning": {
+        "instantCheckMs": 250,
+        "minPointerTrail": 1,
+        "maxToggles": 6
+      }
+    },
+    "content": {
+      "label": "Layer 4 営業文面判定",
+      "group": "sales",
+      "weight": 0.75,
+      "saturation": 6,
+      "points": {
+        "content.ngWords": 4,
+        "content.urlSpam": 2,
+        "content.companyIntroOpening": 2,
+        "content.signatureBlock": 1.5,
+        "content.noJapaneseOnJapaneseForm": 1
+      },
+      "tuning": {
+        "minChars": 24,
+        "ngScoreSaturation": 12,
+        "freeUrlAllowance": 1,
+        "urlSaturation": 4,
+        "companyIntroHeadChars": 120
+      }
+    },
+    "aiText": {
+      "label": "Layer 6 AI生成文っぽさ判定",
+      "group": "sales",
+      "weight": 0.25,
+      "saturation": 5,
+      "points": {
+        "ai.uniformSentenceLength": 2,
+        "ai.politeTemplateDensity": 2,
+        "ai.lowBurstiness": 1.5,
+        "ai.structuredListing": 1,
+        "ai.noTypos": 1
+      },
+      "tuning": {
+        "minChars": 80,
+        "minSentences": 4,
+        "sentenceLengthCvFloor": 0.32,
+        "politePhraseDensityCeiling": 0.012,
+        "burstinessFloor": 0.35,
+        "humanNoiseMarkers": [
+          "！！",
+          "。。",
+          "、、",
+          "www",
+          "笑",
+          "すみません",
+          "ごめん",
+          "ちょっと",
+          "とりあえず",
+          "よろしくです",
+          "！？",
+          "?!"
+        ],
+        "politePhrases": [
+          "いただければ",
+          "いただけますと",
+          "いただけますでしょうか",
+          "させていただき",
+          "させていただければ",
+          "ご検討いただ",
+          "幸いです",
+          "幸甚",
+          "存じます",
+          "お忙しいところ",
+          "お忙しい中",
+          "何卒",
+          "よろしくお願い申し上げます",
+          "ご確認のほど",
+          "恐れ入りますが",
+          "誠に",
+          "つきましては",
+          "なお、",
+          "また、",
+          "さらに、"
+        ]
+      }
+    }
+  },
+  "combine": "noisy-or",
+  "groups": {
+    "automation": {
+      "label": "自動化・bot の疑い",
+      "weight": 1
+    },
+    "sales": {
+      "label": "営業・勧誘目的の疑い",
+      "weight": 1
+    }
+  }
+};

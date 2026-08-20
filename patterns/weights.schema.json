@@ -1,0 +1,115 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://miyabarrier.dev/schema/weights.schema.json",
+  "title": "Miyabarrier scoring weights",
+  "type": "object",
+  "required": ["version", "thresholds", "layers"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "version": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "updated": {
+      "type": "string"
+    },
+    "notes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "thresholds": {
+      "type": "object",
+      "required": ["review", "block"],
+      "additionalProperties": false,
+      "properties": {
+        "review": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "block": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        }
+      }
+    },
+    "combine": {
+      "enum": ["noisy-or", "weighted-mean"],
+      "description": "グループスコアの合成方法。既定は noisy-or。"
+    },
+    "groups": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["weight"],
+        "additionalProperties": false,
+        "properties": {
+          "label": {
+            "type": "string"
+          },
+          "weight": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          }
+        }
+      }
+    },
+    "hardBlock": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "1つでも立てば即 block になるシグナル code。"
+    },
+    "layers": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "type": "object",
+        "required": ["group", "weight", "saturation", "points"],
+        "additionalProperties": false,
+        "properties": {
+          "label": {
+            "type": "string"
+          },
+          "group": {
+            "enum": ["automation", "sales"],
+            "description": "所属グループ。グループ内で weight の合計が 1.0 になるようにする。"
+          },
+          "weight": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "evidenceOnly": {
+            "type": "boolean",
+            "description": "true なら加点があるときだけ母数に入る（沈黙を無罪の証拠にしない）。ハニーポット向け。"
+          },
+          "saturation": {
+            "type": "number",
+            "exclusiveMinimum": 0,
+            "description": "このレイヤーが 1.0 になる加点の合計。"
+          },
+          "points": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "number"
+            },
+            "description": "シグナル code ごとの加点。"
+          },
+          "tuning": {
+            "type": "object",
+            "description": "レイヤー固有のしきい値。キーは実装側と対応。"
+          }
+        }
+      }
+    }
+  }
+}

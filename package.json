@@ -1,0 +1,39 @@
+{
+  "name": "miyabarrier-monorepo",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Block sales pitches, bots and AI-driven form spam with one script tag.",
+  "license": "MIT",
+  "workspaces": [
+    "packages/core",
+    "packages/widget"
+  ],
+  "scripts": {
+    "build": "npm run gen && npm run build --workspace @miyabarrier/core && npm run build --workspace @miyabarrier/widget",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc -p packages/core/tsconfig.json && tsc -p packages/widget/tsconfig.json",
+    "lint": "eslint .",
+    "format": "prettier --write \"**/*.{ts,js,mjs,json,md,html,yml}\"",
+    "format:check": "prettier --check \"**/*.{ts,js,mjs,json,md,html,yml}\"",
+    "demo": "node scripts/serve-demo.mjs",
+    "verify": "npm run format:check && npm run lint && npm run typecheck && npm test && npm run build",
+    "gen": "node scripts/build-patterns.mjs",
+    "pretest": "node scripts/build-patterns.mjs"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.17.0",
+    "@types/node": "^26.2.0",
+    "esbuild": "^0.24.0",
+    "eslint": "^9.17.0",
+    "eslint-config-prettier": "^9.1.0",
+    "jsdom": "^29.1.1",
+    "prettier": "^3.4.2",
+    "typescript": "^5.7.2",
+    "typescript-eslint": "^8.18.0",
+    "vitest": "^2.1.8"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

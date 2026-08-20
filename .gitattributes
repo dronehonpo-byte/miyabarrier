@@ -1,0 +1,8 @@
+# 改行は LF に固定する。生成物（patterns.data.ts / dist）をコミットに含めているため、
+# 環境によって改行が変わると CI の「生成物が最新か」チェックが誤検知する。
+* text=auto eol=lf
+
+# 生成物は言語統計とレビューの差分から除外する。
+packages/widget/dist/* linguist-generated=true
+packages/core/src/patterns.data.ts linguist-generated=true
+package-lock.json linguist-generated=true

@@ -1,0 +1,625 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Miyabarrier デモ — 問い合わせフォームの営業・bot ブロック</title>
+    <meta
+      name="description"
+      content="スクリプト 1 行で問い合わせフォームを守る OSS ライブラリ Miyabarrier のデモ。営業文面・bot・AI 自動送信の判定をその場で試せます。"
+    />
+    <style>
+      :root {
+        --bg: #f7f8f9;
+        --card: #ffffff;
+        --fg: #1f2933;
+        --muted: #6b7785;
+        --border: #e2e6ea;
+        --accent: #2f6f4f;
+        --accent-soft: #e8f2ec;
+        --danger: #b3372c;
+        --warn: #a9762a;
+        color-scheme: light dark;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #14181c;
+          --card: #1b2025;
+          --fg: #e7ebef;
+          --muted: #9aa5b1;
+          --border: #333c45;
+          --accent: #7fc7a4;
+          --accent-soft: #1e2e27;
+          --danger: #f0958b;
+          --warn: #e0b768;
+        }
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        padding: 2rem 1.25rem 5rem;
+        background: var(--bg);
+        color: var(--fg);
+        font-family:
+          system-ui,
+          -apple-system,
+          'Segoe UI',
+          'Hiragino Kaku Gothic ProN',
+          'Noto Sans JP',
+          sans-serif;
+        line-height: 1.75;
+      }
+      main {
+        max-width: 1040px;
+        margin: 0 auto;
+      }
+      header p.lead {
+        font-size: 1.05rem;
+        color: var(--muted);
+        max-width: 62ch;
+      }
+      h1 {
+        margin: 0 0 0.2em;
+        font-size: clamp(1.6rem, 4vw, 2.25rem);
+        letter-spacing: -0.01em;
+      }
+      h2 {
+        margin: 0 0 0.6em;
+        font-size: 1.1rem;
+      }
+      h3 {
+        margin: 1.4em 0 0.4em;
+        font-size: 0.95rem;
+        color: var(--muted);
+      }
+      code {
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+        font-size: 0.9em;
+        background: color-mix(in srgb, var(--fg) 8%, transparent);
+        padding: 0.1em 0.4em;
+        border-radius: 4px;
+      }
+      pre {
+        margin: 0;
+        overflow-x: auto;
+        background: color-mix(in srgb, var(--fg) 7%, transparent);
+        padding: 0.9rem;
+        border-radius: 8px;
+        font-size: 0.8rem;
+        line-height: 1.6;
+      }
+      pre code {
+        background: none;
+        padding: 0;
+      }
+      .grid {
+        display: grid;
+        gap: 1rem;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        align-items: start;
+        margin: 1.5rem 0;
+      }
+      .card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 1.25rem;
+      }
+      label {
+        display: block;
+        font-size: 0.85rem;
+        color: var(--muted);
+        margin: 0.9rem 0 0.25rem;
+      }
+      input[type='text'],
+      input[type='email'],
+      textarea {
+        width: 100%;
+        font: inherit;
+        font-size: 0.95rem;
+        padding: 0.55rem 0.7rem;
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        background: var(--bg);
+        color: var(--fg);
+      }
+      textarea {
+        min-height: 12rem;
+        resize: vertical;
+      }
+      button {
+        font: inherit;
+        font-size: 0.85rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 6px;
+        border: 1px solid var(--border);
+        background: var(--card);
+        color: var(--fg);
+        cursor: pointer;
+      }
+      button:hover {
+        border-color: var(--accent);
+        color: var(--accent);
+      }
+      button.primary {
+        background: var(--accent);
+        border-color: var(--accent);
+        color: #fff;
+        font-size: 0.95rem;
+        padding: 0.6rem 1.4rem;
+      }
+      button.primary:hover {
+        color: #fff;
+        opacity: 0.9;
+      }
+      .row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+      }
+      .meter {
+        height: 10px;
+        border-radius: 999px;
+        background: color-mix(in srgb, var(--fg) 10%, transparent);
+        overflow: hidden;
+        margin: 0.5rem 0;
+      }
+      .meter > span {
+        display: block;
+        height: 100%;
+        width: 0;
+        background: var(--accent);
+        transition:
+          width 0.2s ease,
+          background 0.2s ease;
+      }
+      .score {
+        display: flex;
+        align-items: baseline;
+        gap: 0.5rem;
+        font-variant-numeric: tabular-nums;
+      }
+      .score b {
+        font-size: 1.6rem;
+      }
+      .verdict {
+        font-size: 0.8rem;
+        padding: 0.1em 0.6em;
+        border-radius: 999px;
+        border: 1px solid currentColor;
+      }
+      .verdict.pass {
+        color: var(--accent);
+      }
+      .verdict.review {
+        color: var(--warn);
+      }
+      .verdict.block {
+        color: var(--danger);
+      }
+      ul.reasons {
+        margin: 0.5rem 0 0;
+        padding-left: 1.2rem;
+        font-size: 0.85rem;
+        color: var(--muted);
+      }
+      .terms {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.3rem;
+        margin-top: 0.6rem;
+      }
+      .term {
+        font-size: 0.75rem;
+        padding: 0.1em 0.5em;
+        border-radius: 999px;
+        background: var(--accent-soft);
+        color: var(--accent);
+      }
+      .note {
+        font-size: 0.82rem;
+        color: var(--muted);
+      }
+      .log {
+        font-size: 0.8rem;
+        color: var(--muted);
+        margin-top: 0.6rem;
+        min-height: 1.5em;
+        font-variant-numeric: tabular-nums;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.85rem;
+      }
+      th,
+      td {
+        text-align: left;
+        padding: 0.4rem 0.5rem;
+        border-bottom: 1px solid var(--border);
+      }
+      th {
+        color: var(--muted);
+        font-weight: 600;
+      }
+      td.num {
+        text-align: right;
+        font-variant-numeric: tabular-nums;
+      }
+      footer {
+        margin-top: 2.5rem;
+        color: var(--muted);
+        font-size: 0.85rem;
+      }
+      a {
+        color: var(--accent);
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <h1>🛡️ Miyabarrier デモ</h1>
+        <p class="lead">
+          問い合わせフォームに <code>&lt;script&gt;</code> を 1
+          行貼るだけで、営業目的の送信・bot・AI エージェントによる自動送信をブロックする OSS
+          ライブラリです。判定はすべてブラウザ内で完結し、 サーバーも API
+          キーも要りません。下のフォームは実際に Miyabarrier で保護されています。
+        </p>
+      </header>
+
+      <div class="grid">
+        <section class="card">
+          <h2>1. フォームを試す</h2>
+          <p class="note">
+            サンプルを流し込んで「送信する」を押してみてください。営業文面と判定されるとブロックされます。
+          </p>
+          <div class="row" style="margin-top: 0.8rem">
+            <button type="button" data-sample="legit">正当な問い合わせ</button>
+            <button type="button" data-sample="sales">営業メール</button>
+            <button type="button" data-sample="ai">AI が書いた営業文</button>
+            <button type="button" data-sample="english">英語スパム</button>
+            <button type="button" data-sample="clear">クリア</button>
+          </div>
+
+          <form id="demo-form" action="#" method="post">
+            <label for="demo-name">お名前</label>
+            <input type="text" id="demo-name" name="name" autocomplete="name" />
+            <label for="demo-email">メールアドレス</label>
+            <input type="email" id="demo-email" name="email" autocomplete="email" />
+            <label for="demo-message">お問い合わせ内容</label>
+            <textarea id="demo-message" name="message"></textarea>
+            <div style="margin-top: 1rem">
+              <button type="submit" class="primary">送信する</button>
+            </div>
+          </form>
+          <p class="log" id="submit-log"></p>
+        </section>
+
+        <section class="card">
+          <h2>2. 文面スコア（Layer 4 / 6）</h2>
+          <p class="note">
+            入力しながらリアルタイムに更新されます。ここに出るのは文面だけの判定で、実際の送信時には
+            行動・環境・ハニーポットの各レイヤーも合わせて評価されます。
+          </p>
+          <div class="score" style="margin-top: 0.8rem">
+            <b id="score-value">0.00</b>
+            <span class="verdict pass" id="score-verdict">pass</span>
+          </div>
+          <div class="meter"><span id="score-bar"></span></div>
+          <ul class="reasons" id="score-reasons"></ul>
+          <div class="terms" id="score-terms"></div>
+          <h3>レイヤー内訳</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>レイヤー</th>
+                <th class="num">スコア</th>
+                <th class="num">重み</th>
+              </tr>
+            </thead>
+            <tbody id="layer-rows"></tbody>
+          </table>
+        </section>
+      </div>
+
+      <section class="card">
+        <h2>3. 自動送信のシミュレーション</h2>
+        <p class="note">
+          その場で bot
+          と同じ動きを再現します。専用のフォーム（非表示）に対して実行するので、上のフォームの
+          入力内容は壊しません。
+        </p>
+        <div class="row" style="margin-top: 0.8rem">
+          <button type="button" id="sim-honeypot">① ハニーポットを埋めて送信</button>
+          <button type="button" id="sim-instant">② 値を代入して即送信</button>
+          <button type="button" id="sim-mimic">③ 人間の操作を模倣して送信（約 5 秒）</button>
+        </div>
+        <p class="log" id="sim-log">結果はここに表示されます。</p>
+        <pre style="margin-top: 0.6rem"><code id="sim-detail">—</code></pre>
+        <form id="sim-form" action="#" method="post" hidden>
+          <input type="text" name="name" />
+          <textarea name="message"></textarea>
+          <button type="submit">送信</button>
+        </form>
+      </section>
+
+      <section class="card">
+        <h2>導入方法</h2>
+        <pre><code>&lt;script
+  src="https://cdn.jsdelivr.net/gh/miyabarrier/miyabarrier@v0.1.0/packages/widget/dist/miyabarrier.min.js"
+  data-mode="block"
+  data-badge="inline"
+  defer&gt;&lt;/script&gt;</code></pre>
+        <p class="note" style="margin-top: 0.8rem">
+          これだけで、ページ内の問い合わせフォームが自動的に保護されます。しきい値や NG
+          ワードの調整、 レポートのみのモードについては
+          <a href="https://github.com/miyabarrier/miyabarrier#readme">README</a>
+          を参照してください。
+        </p>
+      </section>
+
+      <footer>
+        <p>
+          MIT License / 判定はすべて端末内で行われ、入力内容が外部に送信されることはありません。
+          <a href="https://github.com/miyabarrier/miyabarrier">GitHub</a>
+        </p>
+      </footer>
+    </main>
+
+    <!-- 保護対象を明示し、判定内訳を画面に出すためのオプション付きで読み込む -->
+    <script
+      src="../packages/widget/dist/miyabarrier.js"
+      data-selector="#demo-form"
+      data-mode="block"
+      data-badge="inline"
+      data-debug="true"
+    ></script>
+    <script>
+      const SAMPLES = {
+        legit: {
+          name: '鈴木一郎',
+          email: 'ichiro@example.com',
+          message: `先日そちらで購入したコンロなんですが、点火ボタンを押しても火がつかないことが増えてきました。
+保証期間内だと思うので修理をお願いできますか。あと、もし有償になる場合の見積もりも知りたいです。
+週末しか家にいないので、土日に来てもらえると助かります。よろしくお願いします。`,
+        },
+        sales: {
+          name: '田中太郎',
+          email: 'tanaka@example-sales.co.jp',
+          message: `突然のご連絡失礼いたします。株式会社サンプルマーケティングの田中と申します。
+貴社ホームページを拝見し、ぜひご提案させていただきたくご連絡いたしました。
+弊社では中小企業様向けにSEO対策とホームページ制作を提供しており、導入実績は300社を超えております。
+検索順位の改善による集客力の向上と、業務効率化によるコスト削減を同時に実現できます。
+初期費用0円のキャンペーン中で、まずは無料診断からお試しいただけます。
+つきましては、30分ほどオンライン面談のお時間をいただけないでしょうか。ご都合のよい候補日をお知らせください。
+なお、本メールは営業目的でお送りしております。ご不要でしたら配信停止のご連絡をお願いいたします。
+--------------------
+株式会社サンプルマーケティング 営業部 田中太郎
+〒150-0001 東京都渋谷区サンプル1-2-3
+TEL: 03-1234-5678 / FAX: 03-1234-5679
+https://example-sales.co.jp`,
+        },
+        ai: {
+          name: '佐藤',
+          email: 'sato@example.com',
+          message: `お世話になっております。この度は貴社の事業内容を拝見しご連絡いたしました。
+弊社では業務効率化を支援するサービスを提供しております。導入により生産性向上が期待できます。
+主なメリットは以下の通りです。
+・定型業務の工数削減を実現できます
+・部門横断でのデータ連携が可能になります
+・段階的な導入によりリスクを抑えられます
+ご検討いただける場合は、詳細な資料をお送りいたします。
+つきましては、一度お打ち合わせのお時間をいただけますと幸いです。
+ご確認のほど、何卒よろしくお願い申し上げます。`,
+        },
+        english: {
+          name: 'John Smith',
+          email: 'john@example.com',
+          message: `Dear Sir or Madam,
+
+I hope this email finds you well. We are a leading digital agency and we specialize in SEO services
+that will get you on the first page of Google. We can also provide high quality backlinks and link building.
+
+Let me know if you are interested and we can book a call. It is a free audit with no obligation.
+
+Best regards,
+John`,
+        },
+      };
+
+      const form = document.querySelector('#demo-form');
+      const message = document.querySelector('#demo-message');
+      const scoreValue = document.querySelector('#score-value');
+      const scoreVerdict = document.querySelector('#score-verdict');
+      const scoreBar = document.querySelector('#score-bar');
+      const scoreReasons = document.querySelector('#score-reasons');
+      const scoreTerms = document.querySelector('#score-terms');
+      const layerRows = document.querySelector('#layer-rows');
+      const submitLog = document.querySelector('#submit-log');
+
+      const VERDICT_LABEL = { pass: '通過', review: '確認', block: 'ブロック' };
+      const COLOR = { pass: 'var(--accent)', review: 'var(--warn)', block: 'var(--danger)' };
+
+      /** 文面スコアの表示を更新する。 */
+      function refreshScore() {
+        const result = window.Miyabarrier.analyzeText(message.value);
+        scoreValue.textContent = result.score.toFixed(2);
+        scoreVerdict.textContent = `${result.verdict} / ${VERDICT_LABEL[result.verdict]}`;
+        scoreVerdict.className = `verdict ${result.verdict}`;
+        scoreBar.style.width = `${Math.round(result.score * 100)}%`;
+        scoreBar.style.background = COLOR[result.verdict];
+
+        scoreReasons.innerHTML = '';
+        for (const reason of result.reasons) {
+          const item = document.createElement('li');
+          item.textContent = reason;
+          scoreReasons.append(item);
+        }
+
+        const content = result.layers.find((layer) => layer.layer === 'content');
+        scoreTerms.innerHTML = '';
+        const detected = content?.signals.find((signal) => signal.code === 'content.ngWords');
+        if (detected?.detail) {
+          const terms = detected.detail.split('検出語: ')[1] ?? '';
+          for (const term of terms.split('、').filter(Boolean)) {
+            const chip = document.createElement('span');
+            chip.className = 'term';
+            chip.textContent = term;
+            scoreTerms.append(chip);
+          }
+        }
+
+        layerRows.innerHTML = '';
+        for (const layer of result.layers) {
+          const row = document.createElement('tr');
+          const name = document.createElement('td');
+          name.textContent = layer.label;
+          const score = document.createElement('td');
+          score.className = 'num';
+          score.textContent = layer.applicable ? layer.score.toFixed(2) : '—';
+          const weight = document.createElement('td');
+          weight.className = 'num';
+          weight.textContent = layer.weight.toFixed(2);
+          row.append(name, score, weight);
+          layerRows.append(row);
+        }
+      }
+
+      /**
+       * サンプルの流し込み。value を代入するだけだと widget からは
+       * 「イベントを伴わない機械的な入力」に見えてしまうため、
+       * 人が貼り付けたときと同じイベント（focus と input）を発生させる。
+       */
+      function fillField(field, value) {
+        field.focus();
+        field.value = value;
+        field.dispatchEvent(new Event('input', { bubbles: true }));
+      }
+
+      for (const button of document.querySelectorAll('[data-sample]')) {
+        button.addEventListener('click', () => {
+          const sample = SAMPLES[button.dataset.sample];
+          fillField(form.querySelector('[name="name"]'), sample?.name ?? '');
+          fillField(form.querySelector('[name="email"]'), sample?.email ?? '');
+          fillField(message, sample?.message ?? '');
+          submitLog.textContent = sample
+            ? 'サンプルを入力しました。「送信する」で判定されます。'
+            : '';
+          refreshScore();
+        });
+      }
+
+      message.addEventListener('input', refreshScore);
+      refreshScore();
+
+      // 実送信はしないが、判定を通過したことが分かるようにする。
+      form.addEventListener('submit', (event) => {
+        event.preventDefault();
+        const result = window.Miyabarrier.instances.get(form)?.lastResult;
+        submitLog.textContent = `判定を通過しました（総合スコア ${result?.score.toFixed(2) ?? '—'}）。実際のサイトではここでフォームが送信されます。`;
+      });
+
+      // --- 自動送信のシミュレーション -------------------------------------
+      const simForm = document.querySelector('#sim-form');
+      const simLog = document.querySelector('#sim-log');
+      const simDetail = document.querySelector('#sim-detail');
+      const SIM_TEXT =
+        'お問い合わせフォームの動作確認のためのテスト送信です。ご確認をお願いします。';
+
+      // report モードでは widget が送信を止めないので、デモ側でページ遷移を防ぐ。
+      simForm.addEventListener('submit', (event) => event.preventDefault());
+
+      /** シミュレーションごとに、まっさらな保護済みフォームを用意する。 */
+      function freshSimGuard() {
+        const previous = window.Miyabarrier.instances.get(simForm);
+        previous?.destroy();
+        window.Miyabarrier.instances.delete(simForm);
+        simForm.querySelector('[name="name"]').value = '';
+        simForm.querySelector('[name="message"]').value = '';
+        return window.Miyabarrier.protect(simForm, {
+          mode: 'report', // 実際の画面には出さず、結果だけを取り出す
+          badge: false,
+          checkbox: true,
+          log: false,
+        });
+      }
+
+      function reportSim(label, guard) {
+        const result = guard.lastResult;
+        if (!result) {
+          simLog.textContent = `${label}: 判定結果を取得できませんでした。`;
+          return;
+        }
+        simLog.textContent = `${label} → ${result.verdict.toUpperCase()}（スコア ${result.score.toFixed(2)}${result.hardBlocked ? ' / 即時ブロック' : ''}）`;
+        simDetail.textContent = [
+          ...result.reasons.map((reason) => `・${reason}`),
+          '',
+          ...result.groups.map(
+            (group) => `${group.label}: ${group.applicable ? group.score.toFixed(2) : '判定不能'}`,
+          ),
+          ...result.layers
+            .filter((layer) => layer.signals.length > 0)
+            .map(
+              (layer) =>
+                `${layer.label}: ${layer.score.toFixed(2)} (${layer.signals.map((signal) => signal.code).join(', ')})`,
+            ),
+        ].join('\n');
+      }
+
+      document.querySelector('#sim-honeypot').addEventListener('click', () => {
+        const guard = freshSimGuard();
+        simForm.querySelector('[name="message"]').value = SIM_TEXT;
+        // 人間には見えない欄。DOM を機械的に埋める相手だけが引っかかる。
+        simForm.querySelector('[name="mb_website"]').value = 'https://example-sales.co.jp';
+        simForm.requestSubmit();
+        reportSim('① ハニーポット', guard);
+      });
+
+      document.querySelector('#sim-instant').addEventListener('click', () => {
+        const guard = freshSimGuard();
+        simForm.querySelector('[name="name"]').value = '営業太郎';
+        simForm.querySelector('[name="message"]').value = SIM_TEXT;
+        simForm.querySelector('[name="mb_confirm"]').click(); // スクリプトからのクリック
+        simForm.requestSubmit();
+        reportSim('② 即時送信', guard);
+      });
+
+      document.querySelector('#sim-mimic').addEventListener('click', async (event) => {
+        const button = event.currentTarget;
+        button.disabled = true;
+        simLog.textContent = '③ 模倣操作を生成中…（等速のマウス移動と等間隔の打鍵）';
+        const guard = freshSimGuard();
+        const field = simForm.querySelector('[name="message"]');
+
+        const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+        // 等速・直線のポインタ移動（人間の手ぶれがない）
+        for (let i = 0; i < 40; i += 1) {
+          document.dispatchEvent(
+            new MouseEvent('pointermove', {
+              clientX: 200 + i * 8,
+              clientY: 300 + i * 4,
+              bubbles: true,
+            }),
+          );
+          await wait(45);
+        }
+
+        // 等間隔の打鍵（間隔のばらつきがない）
+        field.dispatchEvent(new FocusEvent('focusin', { bubbles: true }));
+        for (const character of SIM_TEXT) {
+          field.value += character;
+          field.dispatchEvent(new KeyboardEvent('keydown', { key: character, bubbles: true }));
+          await wait(60);
+        }
+
+        simForm.requestSubmit();
+        reportSim('③ 模倣操作', guard);
+        button.disabled = false;
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,24 @@
+{
+  "name": "@miyabarrier/core",
+  "version": "0.1.0",
+  "description": "Detection layers and scoring engine for Miyabarrier. No network, no DOM required.",
+  "license": "MIT",
+  "type": "module",
+  "main": "./lib/index.js",
+  "types": "./lib/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./lib/index.d.ts",
+      "import": "./lib/index.js"
+    }
+  },
+  "files": [
+    "lib",
+    "README.md"
+  ],
+  "sideEffects": false,
+  "scripts": {
+    "build": "node ../../scripts/build-patterns.mjs && tsc -p tsconfig.build.json",
+    "clean": "node -e \"require('node:fs').rmSync('lib',{recursive:true,force:true})\""
+  }
+}

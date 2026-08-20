@@ -1,0 +1,20 @@
+{
+  "name": "@miyabarrier/widget",
+  "version": "0.1.0",
+  "description": "Drop-in script tag that protects contact forms from sales pitches, bots and AI automation.",
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/miyabarrier.esm.js",
+  "unpkg": "./dist/miyabarrier.min.js",
+  "jsdelivr": "./dist/miyabarrier.min.js",
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "node ../../scripts/build-widget.mjs"
+  },
+  "dependencies": {
+    "@miyabarrier/core": "0.1.0"
+  }
+}

@@ -1,0 +1,7 @@
+node_modules/
+packages/*/lib/
+packages/widget/dist/
+coverage/
+
+# 自動生成物（生成側の出力をそのまま保つ）
+packages/core/src/patterns.data.ts
