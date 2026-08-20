@@ -10,7 +10,7 @@
 
 ```html
 <script
-  src="https://cdn.jsdelivr.net/gh/miyabarrier/miyabarrier@v0.1.0/packages/widget/dist/miyabarrier.min.js"
+  src="https://cdn.jsdelivr.net/gh/miyabarrier/miyabarrier@v0.2.0/packages/widget/dist/miyabarrier.min.js"
   defer
 ></script>
 ```
@@ -82,7 +82,7 @@ Miyabarrier は 3 つすべてを対象にします。「機械かどうか」�
 
 ```html
 <script
-  src="https://cdn.jsdelivr.net/gh/miyabarrier/miyabarrier@v0.1.0/packages/widget/dist/miyabarrier.min.js"
+  src="https://cdn.jsdelivr.net/gh/miyabarrier/miyabarrier@v0.2.0/packages/widget/dist/miyabarrier.min.js"
   data-mode="block"
   data-badge="inline"
   defer
