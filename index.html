@@ -1,0 +1,170 @@
+<!doctype html>
+<!--
+  GitHub Pages のトップページ。
+  Pages は main ブランチのルートをそのまま配信し、.nojekyll で Jekyll を無効にしているため、
+  ルートに index.html が無いと 404 になる。リポジトリのビルドには関与しない。
+-->
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Miyabarrier — 問い合わせフォームの営業・bot ブロック</title>
+    <meta
+      name="description"
+      content="問い合わせフォームに script 1 行貼るだけで、営業目的の送信・bot・AI エージェントによる自動送信をブロックする OSS ライブラリ。サーバー不要・API キー不要・外部通信ゼロ。"
+    />
+    <style>
+      :root {
+        --bg: #f7f8f9;
+        --card: #fff;
+        --fg: #1f2933;
+        --muted: #6b7785;
+        --border: #e2e6ea;
+        --accent: #2f6f4f;
+        color-scheme: light dark;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #14181c;
+          --card: #1b2025;
+          --fg: #e7ebef;
+          --muted: #9aa5b1;
+          --border: #333c45;
+          --accent: #7fc7a4;
+        }
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        padding: 3rem 1.25rem 5rem;
+        background: var(--bg);
+        color: var(--fg);
+        font-family:
+          system-ui,
+          -apple-system,
+          'Segoe UI',
+          'Hiragino Kaku Gothic ProN',
+          'Noto Sans JP',
+          sans-serif;
+        line-height: 1.8;
+      }
+      main {
+        max-width: 720px;
+        margin: 0 auto;
+      }
+      h1 {
+        margin: 0 0 0.3em;
+        font-size: clamp(1.8rem, 5vw, 2.4rem);
+        letter-spacing: -0.01em;
+      }
+      .lead {
+        font-size: 1.05rem;
+        color: var(--muted);
+        margin: 0 0 2rem;
+      }
+      pre {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 1rem;
+        overflow-x: auto;
+        font-size: 0.8rem;
+        line-height: 1.6;
+        margin: 0 0 2rem;
+      }
+      code {
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      }
+      .cards {
+        display: grid;
+        gap: 0.9rem;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        margin-bottom: 2.5rem;
+      }
+      a.card {
+        display: block;
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 1.1rem;
+        text-decoration: none;
+        color: inherit;
+      }
+      a.card:hover {
+        border-color: var(--accent);
+      }
+      a.card b {
+        display: block;
+        color: var(--accent);
+        margin-bottom: 0.2em;
+      }
+      a.card span {
+        font-size: 0.85rem;
+        color: var(--muted);
+      }
+      ul {
+        padding-left: 1.3rem;
+        color: var(--muted);
+        font-size: 0.92rem;
+      }
+      footer {
+        margin-top: 2.5rem;
+        color: var(--muted);
+        font-size: 0.85rem;
+      }
+      a {
+        color: var(--accent);
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>🛡️ Miyabarrier</h1>
+      <p class="lead">
+        問い合わせフォームに <code>&lt;script&gt;</code> を 1 行貼るだけで、営業目的の送信・bot・AI
+        エージェントによる自動送信をブロックする OSS ライブラリ。サーバー不要・API
+        キー不要・外部通信ゼロ。
+      </p>
+
+      <pre><code>&lt;script
+  src="https://cdn.jsdelivr.net/gh/dronehonpo-byte/miyabarrier@v0.2.0/packages/widget/dist/miyabarrier.min.js"
+  defer&gt;&lt;/script&gt;</code></pre>
+
+      <div class="cards">
+        <a class="card" href="./examples/demo.html">
+          <b>デモを試す →</b>
+          <span>営業文を貼ると警告が出ます。bot の動きも再現できます。</span>
+        </a>
+        <a class="card" href="./packages/dashboard/index.html">
+          <b>ダッシュボード →</b>
+          <span>判定ログの可視化としきい値シミュレーター。</span>
+        </a>
+        <a class="card" href="https://github.com/dronehonpo-byte/miyabarrier#readme">
+          <b>ドキュメント →</b>
+          <span>導入方法、しきい値の調整、NG ワードのカスタマイズ。</span>
+        </a>
+        <a
+          class="card"
+          href="https://github.com/dronehonpo-byte/miyabarrier/blob/main/docs/how-it-works.md"
+        >
+          <b>仕組み →</b>
+          <span>7 レイヤーの判定内容と、スコアの組み立て方。</span>
+        </a>
+      </div>
+
+      <ul>
+        <li>判定はすべて閲覧者のブラウザ内で完結し、入力内容が外部に送られることはありません</li>
+        <li>ハニーポット・行動解析・自動化痕跡・「不自然な自然さ」・文面判定などの多層防御</li>
+        <li>NG ワードとスコア重みは JSON。コードを読まずに追記・調整できます</li>
+        <li>ランタイム依存 0、gzip 約 21KB の 1 ファイル</li>
+      </ul>
+
+      <footer>
+        MIT License ·
+        <a href="https://github.com/dronehonpo-byte/miyabarrier">GitHub</a>
+      </footer>
+    </main>
+  </body>
+</html>
