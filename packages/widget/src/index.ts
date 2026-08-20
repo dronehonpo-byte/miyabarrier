@@ -29,6 +29,7 @@ import {
   buildCounterMail,
   clearCounterQueue,
   defaultCounterOptions,
+  mailtoUrl,
   queueCounterMail,
   readCounterQueue,
   shouldCounter,
@@ -72,13 +73,13 @@ export interface MiyabarrierOptions {
   debug: boolean;
   /** 判定結果を localStorage に残す（本文は保存しない）。 */
   log: boolean;
-  /** localStorage に保持する判定結果の件数。dashboard での観察期間に合わせて増やせる。 */
+  /** localStorage に保持する判定結果の件数。観察期間に合わせて増やせる。 */
   logLimit: number;
   /** スクリプト読み込み時にフォームを自動検出して保護するか。 */
   autoInit: boolean;
   /**
    * お返しの営業（カウンターピッチ）。営業と判定したときに自社の営業文を作る。
-   * **自動送信はしない**。送信箱に溜め、ダッシュボードから人間が送る。
+   * **自動送信はしない**。送信箱（localStorage）に溜め、送るかどうかは人間が決める。
    */
   counter: CounterOptions;
   /** お返しの営業を作ったときのフック。自前のエンドポイントへ渡したい場合に使う。 */
@@ -529,6 +530,7 @@ export const api = {
   clearLog,
   getCounterQueue: readCounterQueue,
   clearCounterQueue,
+  counterMailtoUrl: mailtoUrl,
   destroyAll,
   defaultOptions,
   defaultWeights,

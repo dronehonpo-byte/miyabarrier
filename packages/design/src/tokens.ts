@@ -1,6 +1,6 @@
 /**
- * デザイントークン。widget（JS から style 注入）と dashboard / demo（静的 CSS）で
- * **同じ定義を共有する唯一の場所**。ここを直せば 4 つの画面すべてに反映される。
+ * デザイントークン。widget（JS から style 注入）と静的ページ（demo / トップページ）で
+ * **同じ定義を共有する唯一の場所**。ここを直せば全画面に反映される。
  *
  * 方針:
  * - Miyabee のブルーを主役にする。警告色は「点」で使い、面で使わない
@@ -107,14 +107,14 @@ const DARK = `
   --mb-ring: 0 0 0 3px rgba(122, 166, 247, 0.22);
 `;
 
-/** 判定 3 値に対応するトークン名。widget / dashboard で同じ色になるように使う。 */
+/** 判定 3 値に対応するトークン名。全画面で同じ色になるように使う。 */
 export const VERDICT_TOKENS = {
   pass: { fg: 'var(--mb-pass)', soft: 'var(--mb-pass-soft)', line: 'var(--mb-pass-line)' },
   review: { fg: 'var(--mb-review)', soft: 'var(--mb-review-soft)', line: 'var(--mb-review-line)' },
   block: { fg: 'var(--mb-block)', soft: 'var(--mb-block-soft)', line: 'var(--mb-block-line)' },
 } as const;
 
-/** :root に一度だけ入れる形（dashboard / demo 用）。 */
+/** :root に一度だけ入れる形（静的ページ用）。 */
 export const tokensCss = `
 :root {${LIGHT}}
 @media (prefers-color-scheme: dark) {

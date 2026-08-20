@@ -1,19 +1,18 @@
 {
   "name": "miyabarrier-monorepo",
   "private": true,
-  "version": "0.4.1",
+  "version": "0.5.0",
   "description": "Block sales pitches, bots and AI-driven form spam with one script tag.",
   "license": "MIT",
   "workspaces": [
     "packages/core",
-    "packages/widget",
-    "packages/dashboard"
+    "packages/widget"
   ],
   "scripts": {
-    "build": "npm run gen && npm run build --workspace @miyabarrier/core && npm run build --workspace @miyabarrier/widget && npm run build --workspace @miyabarrier/dashboard",
+    "build": "npm run gen && npm run build --workspace @miyabarrier/core && npm run build --workspace @miyabarrier/widget",
     "test": "vitest run",
     "test:watch": "vitest",
-    "typecheck": "tsc -p packages/core/tsconfig.json && tsc -p packages/widget/tsconfig.json && tsc -p packages/dashboard/tsconfig.json",
+    "typecheck": "tsc -p packages/core/tsconfig.json && tsc -p packages/widget/tsconfig.json",
     "lint": "eslint .",
     "format": "prettier --write \"**/*.{ts,js,mjs,json,md,html,yml}\"",
     "format:check": "prettier --check \"**/*.{ts,js,mjs,json,md,html,yml}\"",

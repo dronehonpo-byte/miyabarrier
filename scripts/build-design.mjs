@@ -3,7 +3,7 @@
  * デザイントークンとロゴを静的アセットとして書き出す。
  *
  * widget は TypeScript から直接 import してバンドルに埋め込むが、
- * dashboard / demo は素の HTML なので CSS と SVG のファイルが必要になる。
+ * demo とトップページは素の HTML なので CSS と SVG のファイルが必要になる。
  * どちらも packages/design が唯一の定義元で、ここはその写しを作るだけ。
  */
 import { mkdirSync, writeFileSync } from 'node:fs';

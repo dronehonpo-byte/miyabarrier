@@ -1,12 +1,12 @@
 /**
  * 判定ログの localStorage 入出力。
  *
- * dashboard もここを import するので、**副作用を一切持たせない**こと。
- * widget の index.ts はスクリプトタグ用に自動初期化を行うため、
- * キーだけが欲しい側がそれを読み込むと余計な処理まで走ってしまう。
+ * 判定結果は Miyabarrier.getLog() で取り出せる。しきい値を決めるときは
+ * このログを書き出して使う。**このモジュールに副作用を持たせないこと**（キーだけを
+ * 使いたい側が index.ts を読み込むと、自動初期化まで走ってしまう）。
  */
 
-/** 判定ログの localStorage キー。widget と dashboard の唯一の定義元。 */
+/** 判定ログの localStorage キー。 */
 export const LOG_STORAGE_KEY = 'miyabarrier:log';
 
 export interface LogEntry {

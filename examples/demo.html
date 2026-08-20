@@ -267,7 +267,6 @@
       <span class="mb-topbar__ctx">デモ</span>
       <span class="mb-topbar__actions">
         <a class="mb-btn" href="./embedded.html">実サイト埋め込み例</a>
-        <a class="mb-btn" href="../packages/dashboard/index.html">ダッシュボード</a>
         <a class="mb-btn" href="https://github.com/dronehonpo-byte/miyabarrier">GitHub</a>
       </span>
     </header>
@@ -293,7 +292,7 @@
         </div>
         <div>
           <pre><code>&lt;script
-  src="https://cdn.jsdelivr.net/gh/dronehonpo-byte/miyabarrier@v0.4.1/packages/widget/dist/miyabarrier.min.js"
+  src="https://cdn.jsdelivr.net/gh/dronehonpo-byte/miyabarrier@v0.5.0/packages/widget/dist/miyabarrier.min.js"
   data-mode="block"
   defer&gt;&lt;/script&gt;</code></pre>
           <div class="demo-steps">
@@ -431,14 +430,11 @@
           <p class="mb-note" style="margin-bottom: 1rem">
             <code>&lt;/body&gt;</code>
             の直前に貼るだけで、ページ内の問い合わせフォームを自動検出して保護します。まずは
-            <code>data-mode="report"</code> で記録だけを取り、<a
-              href="../packages/dashboard/index.html"
-              >ダッシュボード</a
-            >
-            でしきい値を決めてから <code>block</code> に切り替えるのが安全です。
+            <code>data-mode="report"</code> で記録だけを取り、<code>Miyabarrier.getLog()</code>
+            でログを見てしきい値を決めてから <code>block</code> に切り替えるのが安全です。
           </p>
           <pre><code>&lt;script
-  src="https://cdn.jsdelivr.net/gh/dronehonpo-byte/miyabarrier@v0.4.1/packages/widget/dist/miyabarrier.min.js"
+  src="https://cdn.jsdelivr.net/gh/dronehonpo-byte/miyabarrier@v0.5.0/packages/widget/dist/miyabarrier.min.js"
   data-mode="report"
   data-badge="inline"
   defer&gt;&lt;/script&gt;</code></pre>

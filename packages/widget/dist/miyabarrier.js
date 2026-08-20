@@ -1,4 +1,4 @@
-/*! Miyabarrier v0.4.1 | MIT License | https://github.com/dronehonpo-byte/miyabarrier */
+/*! Miyabarrier v0.5.0 | MIT License | https://github.com/dronehonpo-byte/miyabarrier */
 "use strict";
 (() => {
   // ../core/src/util.ts
@@ -2156,6 +2156,7 @@
     } catch {
     }
   };
+  var mailtoUrl = (mail) => `mailto:${encodeURIComponent(mail.to)}?subject=${encodeURIComponent(mail.subject)}&body=${encodeURIComponent(mail.body)}`;
 
   // ../design/src/logo.ts
   var LOBES = 3;
@@ -2954,7 +2955,7 @@ ${selector} {${LIGHT}}
   };
 
   // src/index.ts
-  var VERSION = true ? "0.4.1" : "0.0.0";
+  var VERSION = true ? "0.5.0" : "0.0.0";
   var defaultOptions = {
     mode: "block",
     checkbox: true,
@@ -3298,6 +3299,7 @@ ${selector} {${LIGHT}}
     clearLog: clearLog2,
     getCounterQueue: readCounterQueue,
     clearCounterQueue,
+    counterMailtoUrl: mailtoUrl,
     destroyAll,
     defaultOptions,
     defaultWeights,

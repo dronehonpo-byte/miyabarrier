@@ -14,7 +14,7 @@ export interface Signal {
   code: string;
   /** 0〜1。加点は points * intensity になる。省略時は 1。 */
   intensity?: number;
-  /** 人間向けの補足（デバッグ表示・ダッシュボード用）。 */
+  /** 人間向けの補足（デバッグ表示用）。 */
   detail?: string;
 }
 

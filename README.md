@@ -10,7 +10,7 @@
 
 ```html
 <script
-  src="https://cdn.jsdelivr.net/gh/dronehonpo-byte/miyabarrier@v0.4.1/packages/widget/dist/miyabarrier.min.js"
+  src="https://cdn.jsdelivr.net/gh/dronehonpo-byte/miyabarrier@v0.5.0/packages/widget/dist/miyabarrier.min.js"
   defer
 ></script>
 ```
@@ -82,7 +82,7 @@ Miyabarrier は 3 つすべてを対象にします。「機械かどうか」�
 
 ```html
 <script
-  src="https://cdn.jsdelivr.net/gh/dronehonpo-byte/miyabarrier@v0.4.1/packages/widget/dist/miyabarrier.min.js"
+  src="https://cdn.jsdelivr.net/gh/dronehonpo-byte/miyabarrier@v0.5.0/packages/widget/dist/miyabarrier.min.js"
   data-mode="block"
   data-badge="inline"
   defer
@@ -119,7 +119,7 @@ import {
   protect,
   protectAll,
   analyzeText,
-} from 'https://cdn.jsdelivr.net/gh/dronehonpo-byte/miyabarrier@v0.4.1/packages/widget/dist/miyabarrier.esm.js';
+} from 'https://cdn.jsdelivr.net/gh/dronehonpo-byte/miyabarrier@v0.5.0/packages/widget/dist/miyabarrier.esm.js';
 
 // 個別に保護する
 protect('#contact-form', {
@@ -190,8 +190,8 @@ window.Miyabarrier.getLog();
 ### 自動送信はしません（意図的な設計です）
 
 フォームに入力されたアドレスへ広告メールを自動送信することはしません。生成した文面は
-**下書きとして送信箱（localStorage）に溜まり**、[ダッシュボード](#ダッシュボード判定ログの可視化)の
-「お返しの営業（下書き）」から、宛先と内容を確認して**あなた自身のメールソフトで**送ります。
+**下書きとして送信箱（localStorage）に溜まる**だけです。宛先と内容を確認して、
+**あなた自身のメールソフトで**送ってください。
 
 理由は 3 つあります。
 
@@ -216,37 +216,29 @@ window.MIYABARRIER_CONFIG = {
 送信箱は API からも触れます。
 
 ```js
-Miyabarrier.getCounterQueue(); // 溜まっている下書き
+const drafts = Miyabarrier.getCounterQueue(); // 溜まっている下書き
+Miyabarrier.counterMailtoUrl(drafts[0]); // mailto: の URL（自分のメールソフトで開く）
 Miyabarrier.clearCounterQueue(); // すべて破棄
 ```
 
-## ダッシュボード（判定ログの可視化）
+## 判定ログの見方
 
-`packages/dashboard/` は、溜まった判定ログを見るための静的ページです。サーバーもビルドも不要で、
-`index.html` と `dist/dashboard.js` を置くだけで動きます（gzip 4KB）。
-
-- 判定の内訳・日別の件数・スコアの分布・多かった判定理由・ページ別の集計
-- **しきい値シミュレーター** — 過去のログを別のしきい値で再判定し、「この設定なら何件の判定が変わるか」を表示します
-
-```bash
-npm run demo   # http://localhost:4173/packages/dashboard/index.html
-```
-
-**localStorage はオリジンごとに分かれている**ため、自動で読み込めるのは
-**保護対象サイトと同じオリジンに置いたときだけ**です。別の場所で開く場合は、サイト側のコンソールで
+`data-log`（既定で有効）のとき、判定結果は localStorage に溜まります。保存されるのはスコア・判定・理由・
+時刻・パスだけで、**本文は保存しません**。
 
 ```js
-JSON.stringify(Miyabarrier.getLog());
+Miyabarrier.getLog(); // 溜まっている判定結果
+Miyabarrier.clearLog(); // すべて破棄
 ```
-
-の結果をコピーし、ダッシュボードの「読み込み・書き出し」欄に貼り付けてください。
 
 しきい値を決める流れは次のとおりです。
 
 1. `data-mode="report"` で 1〜2 週間、判定だけを記録する（送信は止まりません）
-2. ダッシュボードでスコアの分布を見る
-3. シミュレーターでしきい値を動かし、正当な問い合わせが `pass` に収まる位置を探す
-4. 決めた値を `data-block-threshold` / `data-review-threshold` に書いて `block` モードへ
+2. `JSON.stringify(Miyabarrier.getLog())` で書き出し、スコアの分布を見る
+3. 正当な問い合わせが収まる位置を `data-block-threshold` / `data-review-threshold` に書いて `block` へ
+
+ログにはスコアが入っているので、しきい値だけを差し替えて後追いで検証できます。判定ロジックを直接使って
+再計算したい場合は `@miyabarrier/core` の `decideVerdict(score, thresholds)` が使えます。
 
 観察期間を長く取るなら `data-log-limit` を増やしてください（既定 200 件）。
 
@@ -341,7 +333,6 @@ CI のワークフロー定義は [.github/ci-templates/](./.github/ci-templates
 ```
 packages/core/      判定レイヤーとスコアリング（DOM・ネットワーク非依存）
 packages/widget/    DOM への注入・計測・UI・スクリプトタグのエントリーポイント
-packages/dashboard/ 判定ログを可視化する静的ページ
 patterns/           NG ワードとスコア重み（JSON。ここが編集の入口）
 scripts/            patterns → TS の生成、バンドル、デモサーバー
 examples/demo.html  デモページ（保護前 / 保護後の比較）
@@ -352,7 +343,6 @@ examples/embedded.html 実サイト埋め込み時の見た目の確認用ペー
 
 ## ロードマップ
 
-- [x] `packages/dashboard` — localStorage のログを可視化する静的ページ（v0.2.0 で追加）
 - [ ] npm への公開（`@miyabarrier/core` / `@miyabarrier/widget`）
 - [ ] NG ワードの多言語対応
 - [ ] サーバーサイド検証のサンプル（`@miyabarrier/core` を Node で使う）

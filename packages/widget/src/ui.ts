@@ -9,7 +9,7 @@
  *   ルート要素で明示的に指定し直す
  * という方針をとる。
  *
- * 見た目の方針は dashboard / demo と共通（packages/design のトークン）。
+ * 見た目の方針は demo と共通（packages/design のトークン）。
  * 警告は「面で塗らない」— 左端 3px の帯、細いバー、小さなピルだけで示す。
  */
 import { markSvg, COMPACT } from '@miyabarrier/design/logo';

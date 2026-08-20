@@ -5,8 +5,8 @@
  *
  * ■ なぜ自動送信しないのか（重要）
  * フォームに入力されたアドレスへ広告メールを自動送信するのは、次の 3 点で危険なので
- * **既定では送信しない**。生成した文面を「送信箱」に溜め、ダッシュボードから
- * 人間が宛先を見て 1 通ずつ送る形にしている。
+ * **既定では送信しない**。生成した文面は「送信箱」（localStorage）に溜まるだけで、
+ * 送るかどうかは人間が宛先を見て決める（Miyabarrier.getCounterQueue() で取り出す）。
  *
  * 1. 法令: 日本の特定電子メール法は広告メールを原則オプトイン（事前同意）としている。
  *    フォームに入力された直後のアドレスは同意を得た宛先ではない。
@@ -18,7 +18,7 @@
  * 渡せるようにしてある。そこから先は運用者の判断。
  */
 
-/** 送信箱の localStorage キー。dashboard も同じキーを読む。 */
+/** 送信箱の localStorage キー。 */
 export const COUNTER_STORAGE_KEY = 'miyabarrier:counter';
 
 export interface CounterOptions {
@@ -198,6 +198,9 @@ export const clearCounterQueue = (): void => {
   }
 };
 
-/** mailto: の URL。運用者自身のメールソフトで開いて、人間が確認して送るための導線。 */
+/**
+ * mailto: の URL。運用者自身のメールソフトで開いて、人間が確認して送るための導線。
+ * Miyabarrier.counterMailtoUrl(mail) として公開している。
+ */
 export const mailtoUrl = (mail: CounterMail): string =>
   `mailto:${encodeURIComponent(mail.to)}?subject=${encodeURIComponent(mail.subject)}&body=${encodeURIComponent(mail.body)}`;

@@ -13,12 +13,6 @@ export default defineConfig({
       '@miyabarrier/design/tokens': fileURLToPath(
         new URL('./packages/design/src/tokens.ts', import.meta.url),
       ),
-      '@miyabarrier/widget/counter': fileURLToPath(
-        new URL('./packages/widget/src/counter.ts', import.meta.url),
-      ),
-      '@miyabarrier/widget/log': fileURLToPath(
-        new URL('./packages/widget/src/log.ts', import.meta.url),
-      ),
     },
   },
   test: {

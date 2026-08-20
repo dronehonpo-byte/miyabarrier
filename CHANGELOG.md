@@ -2,6 +2,32 @@
 
 このプロジェクトは [Semantic Versioning](https://semver.org/lang/ja/) に従います。
 
+## [0.5.0] — 2026-08-20
+
+### 削除
+
+- **`packages/dashboard` を削除しました。** 検知ログの可視化画面、しきい値シミュレーター、
+  「お返しの営業（下書き）」の一覧、および `scripts/build-dashboard.mjs` が対象です。
+  GitHub Pages の `/packages/dashboard/` も無くなります。
+
+### 変更
+
+- 判定ログと「お返しの営業」の下書きは **API から扱う**形になりました。localStorage への
+  保存自体は従来どおり動きます。
+
+  ```js
+  Miyabarrier.getLog(); // 判定ログ
+  Miyabarrier.getCounterQueue(); // お返しの営業の下書き
+  Miyabarrier.counterMailtoUrl(draft); // mailto: の URL（今回追加）
+  ```
+
+- `Miyabarrier.counterMailtoUrl()` を公開 API に追加。ダッシュボードの「メールソフトで開く」
+  ボタンが無くなったため、同じ導線をコードから作れるようにした。
+- README の「ダッシュボード」の節を「判定ログの見方」に差し替え、しきい値を決める手順を
+  API ベースに書き直した。
+- テストは 164 件 → 143 件（ダッシュボードの集計テスト 21 件が対象外になったため）。
+  widget / core のテストは変更していない。
+
 ## [0.4.1] — 2026-08-20
 
 ### 修正
