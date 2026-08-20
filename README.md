@@ -10,7 +10,7 @@
 
 ```html
 <script
-  src="https://cdn.jsdelivr.net/gh/dronehonpo-byte/miyabarrier@v0.4.0/packages/widget/dist/miyabarrier.min.js"
+  src="https://cdn.jsdelivr.net/gh/dronehonpo-byte/miyabarrier@v0.4.1/packages/widget/dist/miyabarrier.min.js"
   defer
 ></script>
 ```
@@ -82,7 +82,7 @@ Miyabarrier は 3 つすべてを対象にします。「機械かどうか」�
 
 ```html
 <script
-  src="https://cdn.jsdelivr.net/gh/dronehonpo-byte/miyabarrier@v0.4.0/packages/widget/dist/miyabarrier.min.js"
+  src="https://cdn.jsdelivr.net/gh/dronehonpo-byte/miyabarrier@v0.4.1/packages/widget/dist/miyabarrier.min.js"
   data-mode="block"
   data-badge="inline"
   defer
@@ -119,7 +119,7 @@ import {
   protect,
   protectAll,
   analyzeText,
-} from 'https://cdn.jsdelivr.net/gh/dronehonpo-byte/miyabarrier@v0.4.0/packages/widget/dist/miyabarrier.esm.js';
+} from 'https://cdn.jsdelivr.net/gh/dronehonpo-byte/miyabarrier@v0.4.1/packages/widget/dist/miyabarrier.esm.js';
 
 // 個別に保護する
 protect('#contact-form', {

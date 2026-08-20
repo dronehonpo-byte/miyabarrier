@@ -1,4 +1,4 @@
-/*! Miyabarrier v0.4.0 | MIT License | https://github.com/dronehonpo-byte/miyabarrier */
+/*! Miyabarrier v0.4.1 | MIT License | https://github.com/dronehonpo-byte/miyabarrier */
 "use strict";
 (() => {
   // ../core/src/util.ts
@@ -2954,7 +2954,7 @@ ${selector} {${LIGHT}}
   };
 
   // src/index.ts
-  var VERSION = true ? "0.4.0" : "0.0.0";
+  var VERSION = true ? "0.4.1" : "0.0.0";
   var defaultOptions = {
     mode: "block",
     checkbox: true,
@@ -3048,6 +3048,9 @@ ${selector} {${LIGHT}}
       if (this.options.honeypot) this.honeypot = injectHoneypot(form);
       if (this.options.checkbox) this.mountCheckbox(doc);
       if (this.options.badge) this.mountBadge(doc);
+      const onInput = () => this.clearVerdictUi();
+      form.addEventListener("input", onInput, { passive: true });
+      this.cleanups.push(() => form.removeEventListener("input", onInput));
       const onSubmit = (event) => this.handleSubmit(event);
       form.addEventListener("submit", onSubmit, true);
       this.cleanups.push(() => form.removeEventListener("submit", onSubmit, true));
@@ -3068,9 +3071,6 @@ ${selector} {${LIGHT}}
       const { wrapper, input } = createCheckbox(doc, this.options.checkboxLabel, "mb_confirm");
       this.checkboxInput = input;
       this.checkboxRow = wrapper;
-      const reset = () => setGuardState(this.checkboxRow, "idle");
-      this.form.addEventListener("input", reset, { passive: true });
-      this.cleanups.push(() => this.form.removeEventListener("input", reset));
       input.addEventListener("click", (event) => {
         this.toggleCount += 1;
         this.trustedClick = event.isTrusted;
@@ -3158,6 +3158,19 @@ ${selector} {${LIGHT}}
       }
       (_e = (_d = this.options).onCounter) == null ? void 0 : _e.call(_d, mail, { form: this.form });
       return mail;
+    }
+    /**
+     * 前回の判定結果の表示をすべて消す。
+     *
+     * 判定パネル（理由・スコア内訳・お返しの営業の文面）とチェック行の状態は
+     * **必ず一緒に**消すこと。片方だけ消すと、内容を書き換えたのに古いスコアと
+     * 古い理由が残り続けることになる。
+     */
+    clearVerdictUi() {
+      var _a;
+      (_a = this.panel) == null ? void 0 : _a.remove();
+      this.panel = void 0;
+      setGuardState(this.checkboxRow, "idle");
     }
     showPanel(result, allowOverride, counterMail) {
       var _a, _b;

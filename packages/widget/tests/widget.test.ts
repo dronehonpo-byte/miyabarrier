@@ -438,3 +438,85 @@ describe('送信のフック', () => {
     expect(submitAndDetect(form)).toBe(false);
   });
 });
+
+describe('入力を書き換えたときの判定表示のリセット', () => {
+  const submitAndDetect = (form: HTMLFormElement): boolean => {
+    const event = new Event('submit', { bubbles: true, cancelable: true });
+    form.dispatchEvent(event);
+    return event.defaultPrevented;
+  };
+
+  /** 実際の編集と同じように input イベントを伴って書き換える。 */
+  const edit = (form: HTMLFormElement, value: string): void => {
+    const field = form.querySelector<HTMLTextAreaElement>('[name="message"]')!;
+    field.value = value;
+    field.dispatchEvent(new InputEvent('input', { bubbles: true }));
+  };
+
+  it('ブロック表示のあとに内容を書き換えると、パネルとチェック行の表示が消える', () => {
+    const form = setup();
+    new ProtectedForm(form, { log: false });
+    fill(form, { message: SALES_PITCH });
+    expect(submitAndDetect(form)).toBe(true);
+    expect(form.querySelector('.mb-panel')).not.toBeNull();
+    expect(form.querySelector('.mb-guard')?.className).toContain('mb-guard--blocked');
+
+    edit(form, '在庫と納期を教えてください。修理の見積もりもお願いします。');
+
+    // 古いスコア・古い理由・古いお返しの営業文が残っていないこと
+    expect(form.querySelector('.mb-panel')).toBeNull();
+    expect(form.querySelector('.mb-counter')).toBeNull();
+    expect(form.querySelector('.mb-guard')?.className).not.toContain('mb-guard--blocked');
+    expect(form.querySelector('.mb-guard__state')?.textContent).toBe('');
+  });
+
+  it('チェックボックス UI を無効にしていてもパネルが消える', () => {
+    // リセットの登録がチェックボックスの初期化に紛れていると、この構成で残り続ける
+    const form = setup();
+    new ProtectedForm(form, { log: false, checkbox: false });
+    fill(form, { message: SALES_PITCH });
+    expect(submitAndDetect(form)).toBe(true);
+    expect(form.querySelector('.mb-panel')).not.toBeNull();
+
+    edit(form, '在庫と納期を教えてください。');
+    expect(form.querySelector('.mb-panel')).toBeNull();
+  });
+
+  it('書き換えて再送信すると新しい内容で評価される', () => {
+    const form = setup();
+    const guard = new ProtectedForm(form, { log: false });
+    fill(form, { message: SALES_PITCH });
+    submitAndDetect(form);
+    const salesBefore = guard.lastResult?.groups.find((group) => group.group === 'sales');
+    expect(salesBefore?.score ?? 0).toBeGreaterThan(0.5);
+
+    edit(form, '在庫と納期を教えてください。修理の見積もりもお願いします。');
+    submitAndDetect(form);
+
+    const salesAfter = guard.lastResult?.groups.find((group) => group.group === 'sales');
+    expect(salesAfter?.score ?? 1).toBe(0);
+    expect(form.querySelector('.mb-counter')).toBeNull();
+  });
+
+  it('お返しの営業の文面も消える（古い宛先の文面を残さない）', () => {
+    const form = setup();
+    fill(form, { email: 'sales@example-corp.co.jp' });
+    new ProtectedForm(form, {
+      log: false,
+      counter: {
+        enabled: true,
+        minSalesScore: 0.5,
+        showOnScreen: true,
+        queueLimit: 10,
+        subject: 'お返し',
+        body: 'お返しの文面 {{name}}',
+      },
+    });
+    fill(form, { email: 'sales@example-corp.co.jp', message: SALES_PITCH });
+    submitAndDetect(form);
+    expect(form.querySelector('.mb-counter')).not.toBeNull();
+
+    edit(form, '見積もりをお願いします。');
+    expect(form.querySelector('.mb-counter')).toBeNull();
+  });
+});

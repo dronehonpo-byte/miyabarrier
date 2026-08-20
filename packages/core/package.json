@@ -1,6 +1,6 @@
 {
   "name": "@miyabarrier/core",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "Detection layers and scoring engine for Miyabarrier. No network, no DOM required.",
   "license": "MIT",
   "type": "module",

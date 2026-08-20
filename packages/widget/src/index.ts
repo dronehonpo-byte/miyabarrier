@@ -222,6 +222,13 @@ export class ProtectedForm {
     if (this.options.checkbox) this.mountCheckbox(doc);
     if (this.options.badge) this.mountBadge(doc);
 
+    // 入力が変わったら前回の判定結果の表示は捨てる。
+    // チェックボックス UI の有無に関係なく必要なので、ここで登録する
+    // （mountCheckbox の中に置くと data-checkbox="false" のサイトで残り続ける）。
+    const onInput = (): void => this.clearVerdictUi();
+    form.addEventListener('input', onInput, { passive: true });
+    this.cleanups.push(() => form.removeEventListener('input', onInput));
+
     const onSubmit = (event: Event): void => this.handleSubmit(event);
     form.addEventListener('submit', onSubmit, true);
     this.cleanups.push(() => form.removeEventListener('submit', onSubmit, true));
@@ -245,10 +252,6 @@ export class ProtectedForm {
     const { wrapper, input } = createCheckbox(doc, this.options.checkboxLabel, 'mb_confirm');
     this.checkboxInput = input;
     this.checkboxRow = wrapper;
-    // 入力し直したら状態表示は白紙に戻す（古い結果を残さない）
-    const reset = (): void => setGuardState(this.checkboxRow, 'idle');
-    this.form.addEventListener('input', reset, { passive: true });
-    this.cleanups.push(() => this.form.removeEventListener('input', reset));
 
     input.addEventListener('click', (event) => {
       this.toggleCount += 1;
@@ -343,6 +346,19 @@ export class ProtectedForm {
     }
     this.options.onCounter?.(mail, { form: this.form });
     return mail;
+  }
+
+  /**
+   * 前回の判定結果の表示をすべて消す。
+   *
+   * 判定パネル（理由・スコア内訳・お返しの営業の文面）とチェック行の状態は
+   * **必ず一緒に**消すこと。片方だけ消すと、内容を書き換えたのに古いスコアと
+   * 古い理由が残り続けることになる。
+   */
+  private clearVerdictUi(): void {
+    this.panel?.remove();
+    this.panel = undefined;
+    setGuardState(this.checkboxRow, 'idle');
   }
 
   private showPanel(
