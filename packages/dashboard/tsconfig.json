@@ -1,0 +1,13 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "types": ["node"],
+    "paths": {
+      "@miyabarrier/core": ["../core/src/index.ts"],
+      "@miyabarrier/widget": ["../widget/src/index.ts"],
+      "@miyabarrier/widget/log": ["../widget/src/log.ts"]
+    }
+  },
+  "include": ["src", "tests"]
+}

@@ -24,12 +24,15 @@ import {
 } from '@miyabarrier/core';
 import { collectFormValues, findForms, injectHoneypot, type InjectedHoneypot } from './inject';
 import { FormTelemetry } from './telemetry';
+import { appendLog, clearLog as clearStoredLog, readLog, type LogEntry } from './log';
 import { createBadge, createCheckbox, createPanel, ensureStyles } from './ui';
 
 declare const __MIYABARRIER_VERSION__: string;
 
 export const VERSION =
   typeof __MIYABARRIER_VERSION__ === 'string' ? __MIYABARRIER_VERSION__ : '0.0.0';
+
+export { LOG_STORAGE_KEY, type LogEntry } from './log';
 
 export type WidgetMode = 'block' | 'warn' | 'report';
 export type BadgeMode = false | 'inline' | 'floating';
@@ -58,6 +61,8 @@ export interface MiyabarrierOptions {
   debug: boolean;
   /** 判定結果を localStorage に残す（本文は保存しない）。 */
   log: boolean;
+  /** localStorage に保持する判定結果の件数。dashboard での観察期間に合わせて増やせる。 */
+  logLimit: number;
   /** スクリプト読み込み時にフォームを自動検出して保護するか。 */
   autoInit: boolean;
   /** 判定後のフック。false を返すと、その回のブロックを取り消す。 */
@@ -77,38 +82,8 @@ export const defaultOptions: MiyabarrierOptions = {
   formLanguage: 'ja',
   debug: false,
   log: true,
+  logLimit: 200,
   autoInit: true,
-};
-
-const LOG_KEY = 'miyabarrier:log';
-const LOG_LIMIT = 50;
-
-export interface LogEntry {
-  t: string;
-  verdict: string;
-  score: number;
-  reasons: string[];
-  form: string;
-  path: string;
-}
-
-const readLog = (): LogEntry[] => {
-  try {
-    const raw = localStorage.getItem(LOG_KEY);
-    const parsed: unknown = raw ? JSON.parse(raw) : [];
-    return Array.isArray(parsed) ? (parsed as LogEntry[]) : [];
-  } catch {
-    return [];
-  }
-};
-
-const appendLog = (entry: LogEntry): void => {
-  try {
-    const entries = [...readLog(), entry].slice(-LOG_LIMIT);
-    localStorage.setItem(LOG_KEY, JSON.stringify(entries));
-  } catch {
-    /* プライベートモード等では黙って諦める */
-  }
 };
 
 // ---------------------------------------------------------------------------
@@ -153,6 +128,8 @@ const readScriptConfig = (script: HTMLScriptElement | null): Partial<Miyabarrier
   if (data.debug !== undefined) config.debug = parseBoolean(data.debug, false);
   if (data.log !== undefined) config.log = parseBoolean(data.log, true);
   if (data.autoInit !== undefined) config.autoInit = parseBoolean(data.autoInit, true);
+  const logLimit = parseNumber(data.logLimit);
+  if (logLimit !== undefined) config.logLimit = logLimit;
 
   const review = parseNumber(data.reviewThreshold);
   const block = parseNumber(data.blockThreshold);
@@ -344,14 +321,18 @@ export class ProtectedForm {
     this.lastResult = result;
 
     if (this.options.log) {
-      appendLog({
-        t: new Date().toISOString(),
-        verdict: result.verdict,
-        score: result.score,
-        reasons: result.reasons,
-        form: this.form.id || this.form.name || 'form',
-        path: typeof location === 'undefined' ? '' : location.pathname,
-      });
+      appendLog(
+        {
+          t: new Date().toISOString(),
+          verdict: result.verdict,
+          score: result.score,
+          hard: result.hardBlocked,
+          reasons: result.reasons,
+          form: this.form.id || this.form.name || 'form',
+          path: typeof location === 'undefined' ? '' : location.pathname,
+        },
+        this.options.logLimit,
+      );
     }
 
     const hookResult = this.options.onVerdict?.(result, { form: this.form });
@@ -435,13 +416,7 @@ export const analyzeText = (
 
 export const getLog = (): LogEntry[] => readLog();
 
-export const clearLog = (): void => {
-  try {
-    localStorage.removeItem(LOG_KEY);
-  } catch {
-    /* noop */
-  }
-};
+export const clearLog = (): void => clearStoredLog();
 
 export const destroyAll = (): void => {
   for (const instance of protectedForms.values()) instance.destroy();

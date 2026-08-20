@@ -1,0 +1,11 @@
+{
+  "name": "@miyabarrier/dashboard",
+  "version": "0.2.0",
+  "private": true,
+  "description": "Static page that visualizes Miyabarrier verdict logs from localStorage. No server, no network.",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "build": "node ../../scripts/build-dashboard.mjs"
+  }
+}

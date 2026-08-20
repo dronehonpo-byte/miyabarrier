@@ -7,6 +7,9 @@ export default defineConfig({
       // widget は npm のワークスペースリンクに頼らず、core のソースを直接参照する。
       // （build-widget.mjs の esbuild alias と同じ解決規則）
       '@miyabarrier/core': fileURLToPath(new URL('./packages/core/src/index.ts', import.meta.url)),
+      '@miyabarrier/widget/log': fileURLToPath(
+        new URL('./packages/widget/src/log.ts', import.meta.url),
+      ),
     },
   },
   test: {

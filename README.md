@@ -105,6 +105,7 @@ Miyabarrier は 3 つすべてを対象にします。「機械かどうか」�
 | `data-debug`            | `false`      | 判定内訳を画面とコンソールに出す                                    |
 | `data-log`              | `true`       | 判定結果を localStorage に残す（本文は保存しません）                |
 | `data-auto-init`        | `true`       | 自動でフォームを探して保護するか                                    |
+| `data-log-limit`        | `200`        | localStorage に保持する判定結果の件数                               |
 
 保護したくないフォームには `data-miyabarrier="off"` を付けてください。パスワード欄を含むフォーム（ログイン・登録）と、自由記述欄のないフォーム（検索など）は自動検出の対象外です。
 
@@ -153,6 +154,36 @@ window.Miyabarrier.getLog();
 ```
 
 また、単独ではブロックに届かないよう意図的に配点を抑えているシグナルがあります。たとえば Layer 2.6（不自然な自然さ）は最大でもブロックに届きません。支援デバイス（視線入力・スイッチ入力など）の利用者は操作が機械的に均一になりうるため、統計的な均一さだけで送信を止めない設計です。
+
+## ダッシュボード（判定ログの可視化）
+
+`packages/dashboard/` は、溜まった判定ログを見るための静的ページです。サーバーもビルドも不要で、
+`index.html` と `dist/dashboard.js` を置くだけで動きます（gzip 4KB）。
+
+- 判定の内訳・日別の件数・スコアの分布・多かった判定理由・ページ別の集計
+- **しきい値シミュレーター** — 過去のログを別のしきい値で再判定し、「この設定なら何件の判定が変わるか」を表示します
+
+```bash
+npm run demo   # http://localhost:4173/packages/dashboard/index.html
+```
+
+**localStorage はオリジンごとに分かれている**ため、自動で読み込めるのは
+**保護対象サイトと同じオリジンに置いたときだけ**です。別の場所で開く場合は、サイト側のコンソールで
+
+```js
+JSON.stringify(Miyabarrier.getLog());
+```
+
+の結果をコピーし、ダッシュボードの「読み込み・書き出し」欄に貼り付けてください。
+
+しきい値を決める流れは次のとおりです。
+
+1. `data-mode="report"` で 1〜2 週間、判定だけを記録する（送信は止まりません）
+2. ダッシュボードでスコアの分布を見る
+3. シミュレーターでしきい値を動かし、正当な問い合わせが `pass` に収まる位置を探す
+4. 決めた値を `data-block-threshold` / `data-review-threshold` に書いて `block` モードへ
+
+観察期間を長く取るなら `data-log-limit` を増やしてください（既定 200 件）。
 
 ## カスタマイズ
 
@@ -229,7 +260,7 @@ window.MIYABARRIER_CONFIG = {
 
 ```bash
 npm install          # 開発依存のインストール
-npm test             # ユニットテスト（vitest, 122 件）
+npm test             # ユニットテスト（vitest, 143 件）
 npm run typecheck    # 型チェック
 npm run lint         # ESLint
 npm run build        # patterns の生成 + core のビルド + widget のバンドル
@@ -240,18 +271,19 @@ npm run verify       # 上記すべて（CI と同じ）
 構成:
 
 ```
-packages/core/     判定レイヤーとスコアリング（DOM・ネットワーク非依存）
-packages/widget/   DOM への注入・計測・UI・スクリプトタグのエントリーポイント
-patterns/          NG ワードとスコア重み（JSON。ここが編集の入口）
-scripts/           patterns → TS の生成、バンドル、デモサーバー
-examples/demo.html デモページ
+packages/core/      判定レイヤーとスコアリング（DOM・ネットワーク非依存）
+packages/widget/    DOM への注入・計測・UI・スクリプトタグのエントリーポイント
+packages/dashboard/ 判定ログを可視化する静的ページ
+patterns/           NG ワードとスコア重み（JSON。ここが編集の入口）
+scripts/            patterns → TS の生成、バンドル、デモサーバー
+examples/demo.html  デモページ
 ```
 
 `patterns/*.json` は `scripts/build-patterns.mjs` が `packages/core/src/patterns.data.ts` に埋め込みます（外部 fetch なしで動かすため）。JSON を編集したら `npm run gen` を実行してください。忘れてもテストが検出します。
 
 ## ロードマップ
 
-- [ ] `packages/dashboard` — localStorage のログを可視化する静的ページ（v0.2）
+- [x] `packages/dashboard` — localStorage のログを可視化する静的ページ（v0.2.0 で追加）
 - [ ] NG ワードの多言語対応
 - [ ] サーバーサイド検証のサンプル（`@miyabarrier/core` を Node で使う）
 - [ ] WordPress / Contact Form 7 向けの導入手順

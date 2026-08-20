@@ -1,0 +1,410 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Miyabarrier ダッシュボード</title>
+    <meta
+      name="description"
+      content="Miyabarrier の判定ログを可視化する静的ページ。localStorage のログだけを読み、外部への送信は行いません。"
+    />
+    <style>
+      :root {
+        --bg: #f7f8f9;
+        --card: #fff;
+        --fg: #1f2933;
+        --muted: #6b7785;
+        --border: #e2e6ea;
+        --pass: #2f6f4f;
+        --review: #a9762a;
+        --block: #b3372c;
+        color-scheme: light dark;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #14181c;
+          --card: #1b2025;
+          --fg: #e7ebef;
+          --muted: #9aa5b1;
+          --border: #333c45;
+          --pass: #7fc7a4;
+          --review: #e0b768;
+          --block: #f0958b;
+        }
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        padding: 2rem 1.25rem 4rem;
+        background: var(--bg);
+        color: var(--fg);
+        font-family:
+          system-ui,
+          -apple-system,
+          'Segoe UI',
+          'Hiragino Kaku Gothic ProN',
+          'Noto Sans JP',
+          sans-serif;
+        line-height: 1.7;
+      }
+      main {
+        max-width: 1080px;
+        margin: 0 auto;
+      }
+      h1 {
+        margin: 0 0 0.2em;
+        font-size: clamp(1.5rem, 4vw, 2rem);
+      }
+      h2 {
+        margin: 0 0 0.7em;
+        font-size: 1rem;
+      }
+      .lead {
+        color: var(--muted);
+        max-width: 68ch;
+        margin: 0 0 1.2rem;
+      }
+      code {
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+        font-size: 0.88em;
+        background: color-mix(in srgb, var(--fg) 8%, transparent);
+        padding: 0.1em 0.4em;
+        border-radius: 4px;
+      }
+      .card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 1.1rem 1.25rem;
+        margin-bottom: 1rem;
+      }
+      .grid {
+        display: grid;
+        gap: 1rem;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        align-items: start;
+      }
+      .status {
+        font-size: 0.85rem;
+        padding: 0.6rem 0.9rem;
+        border-radius: 8px;
+        border: 1px solid var(--border);
+        background: var(--card);
+        margin-bottom: 1rem;
+      }
+      .status-warn {
+        border-color: var(--review);
+        color: var(--review);
+      }
+      .stats {
+        display: grid;
+        gap: 0.75rem;
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+        margin-bottom: 1rem;
+      }
+      .stat {
+        display: flex;
+        flex-direction: column;
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 0.8rem 0.9rem;
+      }
+      .stat-label {
+        font-size: 0.78rem;
+        color: var(--muted);
+      }
+      .stat-value {
+        font-size: 1.7rem;
+        line-height: 1.2;
+        font-variant-numeric: tabular-nums;
+      }
+      .stat-note {
+        font-size: 0.75rem;
+        color: var(--muted);
+      }
+      .bar-pass {
+        fill: var(--pass);
+      }
+      .bar-review {
+        fill: var(--review);
+      }
+      .bar-block {
+        fill: var(--block);
+      }
+      .axis {
+        stroke: var(--border);
+        stroke-width: 1;
+      }
+      .tick {
+        fill: var(--muted);
+        font-size: 10px;
+      }
+      .hist-row,
+      .ranked li {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        font-size: 0.85rem;
+      }
+      .hist-label {
+        flex: 0 0 4.6em;
+        color: var(--muted);
+        font-variant-numeric: tabular-nums;
+      }
+      .ranked-label {
+        flex: 0 0 45%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .hist-track {
+        flex: 1 1 auto;
+        height: 0.7em;
+        border-radius: 999px;
+        background: color-mix(in srgb, var(--fg) 8%, transparent);
+        overflow: hidden;
+      }
+      .hist-fill {
+        height: 100%;
+        border-radius: 999px;
+        background: var(--pass);
+      }
+      .hist-fill-review {
+        background: var(--review);
+      }
+      .hist-fill-block {
+        background: var(--block);
+      }
+      .hist-count {
+        flex: 0 0 2.5em;
+        text-align: right;
+        color: var(--muted);
+        font-variant-numeric: tabular-nums;
+      }
+      .ranked {
+        margin: 0;
+        padding-left: 1.4rem;
+      }
+      .ranked li {
+        margin: 0.25rem 0;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.84rem;
+      }
+      th,
+      td {
+        text-align: left;
+        padding: 0.35rem 0.5rem;
+        border-bottom: 1px solid var(--border);
+        vertical-align: top;
+      }
+      th {
+        color: var(--muted);
+        font-weight: 600;
+      }
+      .num {
+        text-align: right;
+        font-variant-numeric: tabular-nums;
+      }
+      .nowrap {
+        white-space: nowrap;
+      }
+      .reasons {
+        color: var(--muted);
+      }
+      .up {
+        color: var(--block);
+      }
+      .down {
+        color: var(--pass);
+      }
+      .pill {
+        display: inline-block;
+        font-size: 0.72rem;
+        padding: 0.05em 0.5em;
+        border-radius: 999px;
+        border: 1px solid currentColor;
+        margin-right: 0.25em;
+        white-space: nowrap;
+      }
+      .pill-pass {
+        color: var(--pass);
+      }
+      .pill-review {
+        color: var(--review);
+      }
+      .pill-block {
+        color: var(--block);
+      }
+      .pill-hard {
+        color: var(--muted);
+      }
+      .sliders label {
+        display: block;
+        font-size: 0.85rem;
+        margin: 0.7rem 0 0.2rem;
+        color: var(--muted);
+      }
+      input[type='range'] {
+        width: 100%;
+        accent-color: var(--pass);
+      }
+      textarea {
+        width: 100%;
+        min-height: 7rem;
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+        font-size: 0.78rem;
+        padding: 0.6rem;
+        border-radius: 8px;
+        border: 1px solid var(--border);
+        background: var(--bg);
+        color: var(--fg);
+        resize: vertical;
+      }
+      .row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-top: 0.6rem;
+      }
+      button {
+        font: inherit;
+        font-size: 0.85rem;
+        padding: 0.4rem 0.9rem;
+        border-radius: 6px;
+        border: 1px solid var(--border);
+        background: var(--card);
+        color: var(--fg);
+        cursor: pointer;
+      }
+      button:hover {
+        border-color: var(--pass);
+        color: var(--pass);
+      }
+      .empty,
+      .note {
+        color: var(--muted);
+        font-size: 0.82rem;
+        margin: 0.4rem 0 0;
+      }
+      .legend {
+        display: flex;
+        gap: 0.8rem;
+        font-size: 0.75rem;
+        color: var(--muted);
+        margin-top: 0.5rem;
+      }
+      .legend i {
+        display: inline-block;
+        width: 0.7em;
+        height: 0.7em;
+        border-radius: 2px;
+        margin-right: 0.3em;
+      }
+      footer {
+        color: var(--muted);
+        font-size: 0.82rem;
+        margin-top: 1.5rem;
+      }
+      a {
+        color: var(--pass);
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Miyabarrier ダッシュボード</h1>
+      <p class="lead">
+        <code>localStorage</code> に溜まった判定ログを可視化します。ページ内で完結し、外部への送信は
+        行いません。<strong>保護対象サイトと同じオリジンに置いたときだけ自動で読み込めます</strong>
+        （localStorage はオリジンごとに分かれているため）。別の場所で開く場合は、サイト側の
+        コンソールで <code>JSON.stringify(Miyabarrier.getLog())</code> の結果をコピーし、下の欄に
+        貼り付けてください。
+      </p>
+
+      <p class="status status-info" id="status">読み込み中…</p>
+
+      <div class="stats" id="summary"></div>
+
+      <div class="card">
+        <h2>日別の判定件数</h2>
+        <div id="daily"></div>
+        <div class="legend">
+          <span><i style="background: var(--block)"></i>ブロック</span>
+          <span><i style="background: var(--review)"></i>確認</span>
+          <span><i style="background: var(--pass)"></i>通過</span>
+        </div>
+      </div>
+
+      <div class="grid">
+        <div class="card">
+          <h2>しきい値シミュレーター</h2>
+          <p class="note">
+            過去のログのスコアを、別のしきい値で再判定します。<code>report</code>
+            モードで溜めたログから、自分のサイトに合うしきい値を決めるために使ってください。
+            即時ブロック（ハニーポット）はしきい値に関係なくブロックのままです。
+          </p>
+          <div class="sliders">
+            <label for="review">確認しきい値: <span id="review-value">0.40</span></label>
+            <input type="range" id="review" min="0" max="1" step="0.01" value="0.4" />
+            <label for="block">ブロックしきい値: <span id="block-value">0.62</span></label>
+            <input type="range" id="block" min="0" max="1" step="0.01" value="0.62" />
+          </div>
+          <div id="simulation"></div>
+        </div>
+
+        <div class="card">
+          <h2>スコアの分布</h2>
+          <p class="note">色は現在のスライダー設定での判定区分です。</p>
+          <div id="histogram"></div>
+        </div>
+
+        <div class="card">
+          <h2>多かった判定理由</h2>
+          <div id="reasons"></div>
+        </div>
+
+        <div class="card">
+          <h2>ブロック・確認が多かったページ</h2>
+          <div id="paths"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>判定の記録</h2>
+        <div id="log"></div>
+      </div>
+
+      <div class="card">
+        <h2>読み込み・書き出し</h2>
+        <p class="note">
+          別オリジンのログを見るときはここに JSON を貼り付けます。書き出しは読み込み済みの記録を
+          この欄に出すだけで、ファイルは作りません。
+        </p>
+        <textarea
+          id="import-json"
+          placeholder='[{"t":"2026-08-20T01:23:45.678Z","verdict":"block","score":0.8, ...}]'
+        ></textarea>
+        <div class="row">
+          <button type="button" id="import">貼り付けた JSON を読み込む</button>
+          <button type="button" id="export">現在の記録を書き出す</button>
+          <button type="button" id="reload">localStorage を再読み込み</button>
+          <button type="button" id="clear">localStorage のログを削除</button>
+        </div>
+      </div>
+
+      <footer>
+        <p>
+          Miyabarrier · MIT License ·
+          <a href="https://github.com/miyabarrier/miyabarrier">GitHub</a>
+        </p>
+      </footer>
+    </main>
+    <script src="./dist/dashboard.js"></script>
+  </body>
+</html>

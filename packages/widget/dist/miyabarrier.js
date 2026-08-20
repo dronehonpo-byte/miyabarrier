@@ -1,4 +1,4 @@
-/*! Miyabarrier v0.1.0 | MIT License | https://github.com/miyabarrier/miyabarrier */
+/*! Miyabarrier v0.2.0 | MIT License | https://github.com/miyabarrier/miyabarrier */
 "use strict";
 (() => {
   // ../core/src/util.ts
@@ -2044,6 +2044,31 @@
     return snapshot;
   };
 
+  // src/log.ts
+  var LOG_STORAGE_KEY = "miyabarrier:log";
+  var readLog = () => {
+    try {
+      const raw = localStorage.getItem(LOG_STORAGE_KEY);
+      const parsed = raw ? JSON.parse(raw) : [];
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
+  };
+  var appendLog = (entry, limit) => {
+    try {
+      const entries = [...readLog(), entry].slice(-Math.max(1, limit));
+      localStorage.setItem(LOG_STORAGE_KEY, JSON.stringify(entries));
+    } catch {
+    }
+  };
+  var clearLog = () => {
+    try {
+      localStorage.removeItem(LOG_STORAGE_KEY);
+    } catch {
+    }
+  };
+
   // src/ui.ts
   var STYLE_ID = "miyabarrier-style";
   var REPO_URL = "https://github.com/miyabarrier/miyabarrier";
@@ -2190,7 +2215,7 @@ background:transparent;color:inherit;cursor:pointer;}
   };
 
   // src/index.ts
-  var VERSION = true ? "0.1.0" : "0.0.0";
+  var VERSION = true ? "0.2.0" : "0.0.0";
   var defaultOptions = {
     mode: "block",
     checkbox: true,
@@ -2202,25 +2227,8 @@ background:transparent;color:inherit;cursor:pointer;}
     formLanguage: "ja",
     debug: false,
     log: true,
+    logLimit: 200,
     autoInit: true
-  };
-  var LOG_KEY = "miyabarrier:log";
-  var LOG_LIMIT = 50;
-  var readLog = () => {
-    try {
-      const raw = localStorage.getItem(LOG_KEY);
-      const parsed = raw ? JSON.parse(raw) : [];
-      return Array.isArray(parsed) ? parsed : [];
-    } catch {
-      return [];
-    }
-  };
-  var appendLog = (entry) => {
-    try {
-      const entries = [...readLog(), entry].slice(-LOG_LIMIT);
-      localStorage.setItem(LOG_KEY, JSON.stringify(entries));
-    } catch {
-    }
   };
   var scriptElement = typeof document === "undefined" ? null : document.currentScript;
   var parseBoolean = (value, fallback) => {
@@ -2253,6 +2261,8 @@ background:transparent;color:inherit;cursor:pointer;}
     if (data.debug !== void 0) config.debug = parseBoolean(data.debug, false);
     if (data.log !== void 0) config.log = parseBoolean(data.log, true);
     if (data.autoInit !== void 0) config.autoInit = parseBoolean(data.autoInit, true);
+    const logLimit = parseNumber(data.logLimit);
+    if (logLimit !== void 0) config.logLimit = logLimit;
     const review = parseNumber(data.reviewThreshold);
     const block = parseNumber(data.blockThreshold);
     if (review !== void 0 || block !== void 0) {
@@ -2407,14 +2417,18 @@ background:transparent;color:inherit;cursor:pointer;}
       const result = this.analyze();
       this.lastResult = result;
       if (this.options.log) {
-        appendLog({
-          t: (/* @__PURE__ */ new Date()).toISOString(),
-          verdict: result.verdict,
-          score: result.score,
-          reasons: result.reasons,
-          form: this.form.id || this.form.name || "form",
-          path: typeof location === "undefined" ? "" : location.pathname
-        });
+        appendLog(
+          {
+            t: (/* @__PURE__ */ new Date()).toISOString(),
+            verdict: result.verdict,
+            score: result.score,
+            hard: result.hardBlocked,
+            reasons: result.reasons,
+            form: this.form.id || this.form.name || "form",
+            path: typeof location === "undefined" ? "" : location.pathname
+          },
+          this.options.logLimit
+        );
       }
       const hookResult = (_b = (_a = this.options).onVerdict) == null ? void 0 : _b.call(_a, result, { form: this.form });
       const overriddenByHook = hookResult === false;
@@ -2469,12 +2483,7 @@ background:transparent;color:inherit;cursor:pointer;}
     );
   };
   var getLog = () => readLog();
-  var clearLog = () => {
-    try {
-      localStorage.removeItem(LOG_KEY);
-    } catch {
-    }
-  };
+  var clearLog2 = () => clearLog();
   var destroyAll = () => {
     for (const instance of protectedForms.values()) instance.destroy();
     protectedForms.clear();
@@ -2485,7 +2494,7 @@ background:transparent;color:inherit;cursor:pointer;}
     protectAll,
     analyzeText,
     getLog,
-    clearLog,
+    clearLog: clearLog2,
     destroyAll,
     defaultOptions,
     defaultWeights,
